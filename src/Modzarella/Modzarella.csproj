@@ -12,7 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Photino.NET" Version="4.0.16" />
-    <EmbeddedResource Include="Web/ui.html" LogicalName="ui.html" />
+    <EmbeddedResource Include="Web/ui.*" LogicalName="%(Filename)%(Extension)" />
     <EmbeddedResource Include="../../assets/theme.css" LogicalName="theme.css" />
     <EmbeddedResource Include="Runtime/*.dll" LogicalName="runtime/%(Filename)%(Extension)" />
   </ItemGroup>

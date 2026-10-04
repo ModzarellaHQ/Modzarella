@@ -4,75 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Modzarella</title>
-<style>
-  /* theme.css */
-  :root {
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, sans-serif;
-    --mono: ui-monospace, Menlo, Consolas, monospace;
-    color-scheme: dark;
-  }
-  * { box-sizing: border-box }
-  [hidden] { display: none !important }
-  html, body { height: 100% }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 var(--sans); user-select: none; -webkit-user-select: none; display: flex; flex-direction: column }
-
-  header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line) }
-  header strong { font-size: 15px }
-  .where { flex: 1; min-width: 0; font: 11px var(--mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-
-  button { font: 500 12px/1 var(--sans); color: var(--text); background: var(--control); border: 0; padding: 7px 12px; cursor: pointer }
-  button:hover { background: var(--control-hover) }
-  button:disabled { opacity: .5; cursor: default }
-  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px }
-  .primary { background: var(--accent); color: var(--on-accent); font-weight: 600; padding: 8px 16px }
-  .primary:hover { background: var(--accent-hover) }
-  .link { background: none; color: var(--dim); padding: 0 }
-  .link:hover { background: none; color: var(--text) }
-
-  nav { display: flex; gap: 2px; padding: 0 16px; border-bottom: 1px solid var(--line) }
-  nav button { background: none; padding: 10px 12px; color: var(--dim); border-bottom: 2px solid transparent; margin-bottom: -1px }
-  nav button:hover { background: none; color: var(--text) }
-  nav button[aria-selected=true] { color: var(--text); border-bottom-color: var(--accent) }
-  nav input { margin: 6px 0 6px auto; max-width: 200px }
-
-  main { flex: 1; overflow: auto }
-  .notice { color: var(--bad); padding: 10px 16px; margin: 0; border-bottom: 1px solid var(--line) }
-
-  .mod { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-bottom: 1px solid var(--line) }
-  .mod:hover { background: var(--surface) }
-  .mod .body { flex: 1; min-width: 0 }
-  .mod .name { font-weight: 600 }
-  .mod .meta { color: var(--dim); font-size: 12px; margin-left: 6px; font-weight: 400 }
-  .mod .update { color: var(--accent) }
-  .mod p { margin: 2px 0 0; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-  .empty { color: var(--dim); padding: 24px 16px; margin: 0 }
-
-  input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; margin: 0; background: var(--control); cursor: pointer; flex: none }
-  input[type=checkbox]:hover { background: var(--control-hover) }
-  input[type=checkbox]:checked { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='%2317171a' stroke-width='2'/%3E%3C/svg%3E") }
-
-  .settings { padding: 16px; display: grid; gap: 16px; max-width: 640px }
-  .field { display: grid; gap: 6px }
-  .field label { color: var(--dim) }
-  .row { display: flex; gap: 6px }
-  input[type=text], input[type=search] { flex: 1; min-width: 0; background: var(--field); color: var(--text); border: 1px solid var(--line); padding: 6px 8px; font: 12px var(--mono); user-select: text }
-  .danger:hover { background: var(--bad) }
-
-  footer { font: 11px/1.5 var(--mono); color: var(--dim); padding: 6px 16px; border-top: 1px solid var(--line); white-space: pre-wrap; max-height: 80px; overflow: auto }
-  footer.busy { color: var(--accent) }
-</style>
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="/ui.css">
+<script src="/ui.js" defer></script>
 </head>
 <body>
 <header>
   <strong>Modzarella</strong>
   <span class="where" id="game">Looking for Cheese Rolling…</span>
-  <button id="updateAll" onclick="act('update')" hidden>Update all</button>
-  <button class="primary" onclick="act('launch')">Play</button>
+  <button id="updateAll" data-act="update" hidden>Update all</button>
+  <button class="primary" data-act="launch">Play</button>
 </header>
 <nav role="tablist">
-  <button role="tab" id="tabMods" aria-selected="true" onclick="tab('mods')">Mods</button>
-  <button role="tab" id="tabSettings" aria-selected="false" onclick="tab('settings')">Settings</button>
-  <input type="search" id="search" placeholder="Search" aria-label="Search mods" oninput="render()">
+  <button role="tab" id="tabMods" aria-selected="true" data-tab="mods">Mods</button>
+  <button role="tab" id="tabSettings" aria-selected="false" data-tab="settings">Settings</button>
+  <input type="search" id="search" placeholder="Search" aria-label="Search mods">
 </nav>
 <main>
   <p class="notice" id="error" hidden></p>
@@ -80,91 +26,18 @@
   <div class="settings" id="settings" hidden>
     <div class="field">
       <label for="gamedir">Game folder. Leave empty to find it automatically.</label>
-      <div class="row"><input type="text" id="gamedir" placeholder="…/steamapps/common/Cheese Rolling"><button onclick="act('game', null, $('gamedir').value)">Save</button></div>
+      <div class="row"><input type="text" id="gamedir" placeholder="…/steamapps/common/Cheese Rolling"><button data-act="game" data-from="gamedir">Save</button></div>
     </div>
     <div class="field">
       <label for="source">Mod source: a URL, or a folder with an index.json.</label>
-      <div class="row"><input type="text" id="source"><button onclick="act('source', null, $('source').value)">Save</button></div>
+      <div class="row"><input type="text" id="source"><button data-act="source" data-from="source">Save</button></div>
     </div>
     <div class="row">
-      <button id="loader" onclick="act('loader')"></button>
-      <button class="danger" onclick="removeAll(this)">Remove all mods</button>
+      <button id="loader" data-act="loader"></button>
+      <button class="danger" id="removeAll">Remove all mods</button>
     </div>
   </div>
 </main>
 <footer id="log">Ready.</footer>
-<script>
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const doing = { install: 'Installing', enable: 'Turning on', disable: 'Turning off', remove: 'Uninstalling', update: 'Updating', launch: 'Starting the game', loader: 'Installing the mod loader', unloader: 'Removing everything' };
-let busy = false, mods = [];
-
-function tab(name) {
-  $('tabMods').setAttribute('aria-selected', name === 'mods');
-  $('tabSettings').setAttribute('aria-selected', name === 'settings');
-  $('mods').hidden = $('search').hidden = name !== 'mods';
-  $('settings').hidden = name !== 'settings';
-}
-
-function render() {
-  const q = $('search').value.toLowerCase();
-  const shown = mods.filter(({ mod }) => (mod.name + ' ' + mod.description).toLowerCase().includes(q));
-  $('mods').innerHTML = shown.map(({ mod, state }) => {
-    const on = state === 'Enabled' || state === 'UpdateAvailable';
-    const installed = state !== 'NotInstalled';
-    const id = esc(mod.id);
-    return `<div class="mod">
-      <input type="checkbox" aria-label="${esc(mod.name)}" title="${on ? 'On' : 'Off'}" ${on ? 'checked' : ''}
-        onchange="act(this.checked ? '${installed ? 'enable' : 'install'}' : 'disable', '${id}')">
-      <div class="body">
-        <div class="name">${esc(mod.name)}<span class="meta">${esc(mod.version)} · ${esc(mod.author)}</span>${state === 'UpdateAvailable' ? '<span class="meta update">update ready</span>' : ''}</div>
-        <p title="${esc(mod.description)}">${esc(mod.description)}</p>
-      </div>
-      ${installed ? `<button class="link" onclick="act('remove','${id}')">Uninstall</button>` : ''}
-    </div>`;
-  }).join('') || `<p class="empty">${mods.length ? 'No mods match.' : 'No mods yet. Check the mod source in Settings.'}</p>`;
-}
-
-async function load() {
-  const s = await (await fetch('/api/state')).json();
-  if (document.activeElement !== $('source')) $('source').value = s.source;
-  if (document.activeElement !== $('gamedir')) $('gamedir').value = s.gameDir || '';
-  const problem = s.error || (s.game ? '' : "Cheese Rolling wasn't found. Set the game folder in Settings.");
-  $('error').textContent = problem;
-  $('error').hidden = !problem;
-  if (!s.game) tab('settings');
-  $('game').textContent = s.game ? s.game.dir : 'Cheese Rolling not found';
-  $('loader').textContent = s.game?.loader ? 'Repair mod loader' : 'Install mod loader';
-  $('updateAll').hidden = !s.mods.some(m => m.state === 'UpdateAvailable');
-  mods = s.mods;
-  $('tabMods').textContent = `Mods (${mods.length})`;
-  render();
-}
-
-function removeAll(button) {
-  if (button.dataset.armed) { delete button.dataset.armed; act('unloader'); return; }
-  button.dataset.armed = '1';
-  button.textContent = 'Click again to remove everything';
-  setTimeout(() => { delete button.dataset.armed; button.textContent = 'Remove all mods'; }, 4000);
-}
-
-async function act(action, id, value) {
-  if (busy) return;
-  busy = true;
-  document.querySelectorAll('button, input').forEach(b => b.disabled = true);
-  $('log').classList.add('busy');
-  $('log').textContent = `${doing[action] ?? 'Saving'}${id ? ' ' + id : ''}…`;
-  try {
-    const r = await (await fetch('/api/do', { method: 'POST', body: JSON.stringify({ action, id, value }) })).json();
-    $('log').textContent = r.error ? 'Error: ' + r.error : r.log.join('\n');
-  } catch (e) { $('log').textContent = 'Error: ' + e; }
-  $('log').classList.remove('busy');
-  busy = false;
-  document.querySelectorAll('button, input').forEach(b => b.disabled = false);
-  await load();
-}
-
-load();
-</script>
 </body>
 </html>
