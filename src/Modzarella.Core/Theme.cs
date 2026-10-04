@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -102,6 +103,29 @@ namespace Modz
             normal = { background = Solid(Accent) }, hover = { background = Solid(Hex(0xf7c766)) }, active = { background = Solid(TextColor) },
             fixedWidth = 10, fixedHeight = 14, margin = new RectOffset(0, 0, -5, 0),
         });
+
+        static GUIStyle bar, barThumb, none;
+
+        // thin flat scrollbar: IMGUI finds the thumb and arrows by skin style name, so swap them in for one scroll view
+        public static Vector2 Scroll(Vector2 pos, Action draw)
+        {
+            var sk = GUI.skin;
+            GUIStyle b = sk.verticalScrollbar, t = sk.verticalScrollbarThumb, up = sk.verticalScrollbarUpButton, down = sk.verticalScrollbarDownButton;
+            sk.verticalScrollbar = bar ?? (bar = new GUIStyle { normal = { background = Solid(Bg) }, fixedWidth = 6, margin = new RectOffset(0, 2, 2, 2) });
+            sk.verticalScrollbarThumb = barThumb ?? (barThumb = new GUIStyle { normal = { background = Solid(Hex(0x4a4a53)) }, hover = { background = Solid(Hex(0x5a5a64)) }, fixedWidth = 6 });
+            sk.verticalScrollbarUpButton = sk.verticalScrollbarDownButton = none ?? (none = new GUIStyle { fixedWidth = 0, fixedHeight = 0 });
+            try
+            {
+                pos = GUILayout.BeginScrollView(pos, false, false, GUIStyle.none, sk.verticalScrollbar);
+                draw();
+                GUILayout.EndScrollView();
+            }
+            finally
+            {
+                sk.verticalScrollbar = b; sk.verticalScrollbarThumb = t; sk.verticalScrollbarUpButton = up; sk.verticalScrollbarDownButton = down;
+            }
+            return pos;
+        }
 
         static Texture2D vignette;
 

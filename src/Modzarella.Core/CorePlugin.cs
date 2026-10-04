@@ -160,9 +160,7 @@ namespace Modz
             Theme.Rect(new Rect(1, 42, w - 2, 1), Theme.Line);
 
             GUILayout.BeginArea(new Rect(1, 43, w - 2, h - 70));
-            scroll = GUILayout.BeginScrollView(scroll, false, false, GUIStyle.none, GUI.skin.verticalScrollbar);
-            foreach (var p in Pages()) DrawPage(p);
-            GUILayout.EndScrollView();
+            scroll = Theme.Scroll(scroll, () => { foreach (var p in Pages()) DrawPage(p); });
             GUILayout.EndArea();
 
             Theme.Rect(new Rect(1, h - 27, w - 2, 1), Theme.Line);
