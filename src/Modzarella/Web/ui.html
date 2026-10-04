@@ -32,9 +32,21 @@
       <label for="source">Mod source: a URL, or a folder with an index.json.</label>
       <div class="row"><input type="text" id="source"><button data-act="source" data-from="source">Save</button></div>
     </div>
-    <div class="row">
-      <button id="loader" data-act="loader"></button>
-      <button class="danger" id="removeAll">Remove all mods</button>
+    <div class="field">
+      <label>Open</label>
+      <div class="row">
+        <button data-act="open" data-value="game">Game folder</button>
+        <button data-act="open" data-value="mods">Mods folder</button>
+        <button data-act="open" data-value="log">Game log</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Repair and reset</label>
+      <div class="row">
+        <button id="loader" data-act="loader"></button>
+        <button class="danger" data-act="reset" data-confirm="Click again to reset every mod setting">Reset mod settings</button>
+        <button class="danger" data-act="unloader" data-confirm="Click again to remove everything">Remove all mods</button>
+      </div>
     </div>
   </div>
 </main>

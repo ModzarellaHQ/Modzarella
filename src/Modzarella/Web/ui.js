@@ -1,6 +1,6 @@
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const doing = { install: 'Installing', enable: 'Turning on', disable: 'Turning off', remove: 'Uninstalling', update: 'Updating', launch: 'Starting the game', loader: 'Installing the mod loader', unloader: 'Removing everything' };
+const doing = { install: 'Installing', enable: 'Turning on', disable: 'Turning off', remove: 'Uninstalling', update: 'Updating', launch: 'Starting the game', loader: 'Installing the mod loader', unloader: 'Removing everything', reset: 'Resetting mod settings', open: 'Opening' };
 let busy = false, mods = [];
 
 function tab(name) {
@@ -44,11 +44,13 @@ async function load() {
   render();
 }
 
-function removeAll(button) {
-  if (button.dataset.armed) { delete button.dataset.armed; act('unloader'); return; }
+function confirmed(button) {
+  if (button.dataset.armed) { delete button.dataset.armed; return true; }
+  const label = button.textContent;
   button.dataset.armed = '1';
-  button.textContent = 'Click again to remove everything';
-  setTimeout(() => { delete button.dataset.armed; button.textContent = 'Remove all mods'; }, 4000);
+  button.textContent = button.dataset.confirm;
+  setTimeout(() => { delete button.dataset.armed; button.textContent = label; }, 4000);
+  return false;
 }
 
 async function act(action, id, value) {
@@ -71,8 +73,8 @@ document.addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b) return;
   if (b.dataset.tab) tab(b.dataset.tab);
-  else if (b.id === 'removeAll') removeAll(b);
-  else if (b.dataset.act) act(b.dataset.act, b.dataset.id, b.dataset.from && $(b.dataset.from).value);
+  else if (b.dataset.act && (!b.dataset.confirm || confirmed(b)))
+    act(b.dataset.act, b.dataset.id, b.dataset.value ?? (b.dataset.from && $(b.dataset.from).value));
 });
 document.addEventListener('change', e => {
   const c = e.target;

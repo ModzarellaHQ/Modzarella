@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -144,6 +145,15 @@ public static class Web
                 log.AddRange(await catalog.Install(game, r.Id!));
                 return log;
             case "remove": return [Catalog.Remove(game, r.Id!)];
+            case "reset":
+                var cfgs = Directory.Exists(game.Config) ? Directory.GetFiles(game.Config, "modz.*.cfg") : [];
+                foreach (var f in cfgs) File.Delete(f);
+                return [$"Reset {cfgs.Length} settings files. Restart the game to see the defaults."];
+            case "open":
+                var path = r.Value switch { "game" => game.Dir, "mods" => game.Plugins, "log" => game.Log, _ => throw new Exception("Unknown folder") };
+                if (!File.Exists(path) && !Directory.Exists(path)) return [$"{Pretty(path)} doesn't exist yet."];
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+                return [$"Opened {Pretty(path)}"];
             case "enable": return [Catalog.SetEnabled(game, r.Id!, true)];
             case "disable": return [Catalog.SetEnabled(game, r.Id!, false)];
             case "update": return await catalog.UpdateAll(game);
