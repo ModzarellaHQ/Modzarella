@@ -181,7 +181,7 @@ namespace Modz
             bool open = searching || expanded.Contains(p.Name);
 
             var head = GUILayoutUtility.GetRect(1, 30, GUILayout.ExpandWidth(true));
-            Theme.Rect(head, Theme.Surface);
+            Theme.Rect(head, new Color(Theme.Surface.r, Theme.Surface.g, Theme.Surface.b, 0.9f));
             if (p.Enabled != null) p.Enabled.Value = GUI.Toggle(new Rect(head.x + 12, head.y + 7, 16, 16), p.Enabled.Value, GUIContent.none, Theme.Toggle);
             float x = head.x + (p.Enabled != null ? 36 : 12);
             var nameStyle = Theme.TextStyle(13, p.Error != null ? Theme.Bad : Theme.TextColor, "left", true);
@@ -233,8 +233,8 @@ namespace Modz
 
         void Row(ConfigDefinition def, ConfigEntryBase e)
         {
-            GUILayout.BeginHorizontal(GUILayout.Height(26));
-            GUILayout.Label(new GUIContent(def.Key, e.Description.Description), Theme.TextStyle(12, Theme.TextColor), GUILayout.Width(220), GUILayout.Height(24));
+            GUILayout.BeginHorizontal(GUILayout.Height(26), GUILayout.Width(window.width - 50));
+            GUILayout.Label(new GUIContent(def.Key, e.Description.Description), Theme.TextStyle(12, Theme.TextColor), GUILayout.Width(200), GUILayout.Height(24));
             switch (e)
             {
                 case ConfigEntry<bool> b:
@@ -266,8 +266,9 @@ namespace Modz
                 {
                     var opts = list.AcceptableValues;
                     int idx = Math.Max(0, Array.IndexOf(opts, str.Value));
-                    int ni = GUILayout.Toolbar(idx, opts, Theme.Button);
-                    if (ni != idx) str.Value = opts[ni];
+                    if (GUILayout.Button("‹", Theme.Button, GUILayout.Width(26))) str.Value = opts[(idx + opts.Length - 1) % opts.Length];
+                    GUILayout.Label(str.Value, Theme.TextStyle(12, Theme.TextColor, "center"), GUILayout.Width(150), GUILayout.Height(24));
+                    if (GUILayout.Button("›", Theme.Button, GUILayout.Width(26))) str.Value = opts[(idx + 1) % opts.Length];
                     GUILayout.FlexibleSpace();
                     break;
                 }
