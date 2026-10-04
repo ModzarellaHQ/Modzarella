@@ -6,7 +6,7 @@
   <a href="https://github.com/ModzarellaHQ/Modzarella/releases/latest"><b>Download</b></a> ·
   <a href="#install">Install</a> ·
   <a href="docs/troubleshooting.md">Help</a> ·
-  <a href="https://github.com/ModzarellaHQ/Modz">Make mods</a> ·
+  <a href="https://github.com/ModzarellaHQ/modz">Make mods</a> ·
   <a href="https://modza.space">Website</a>
 </p>
 
@@ -67,7 +67,7 @@ Something not working? See [Troubleshooting](docs/troubleshooting.md), or [open 
 
 ## Contributing
 
-- **Mods** live in [Modz](https://github.com/ModzarellaHQ/Modz). Start with the [Lua API](docs/lua-api.md).
+- **Mods** live in [Modz](https://github.com/ModzarellaHQ/modz). Start with the [Lua API](docs/lua-api.md).
 - **The app:** see [CONTRIBUTING.md](CONTRIBUTING.md) and [Building](docs/building.md).
 
 ## License
