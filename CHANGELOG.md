@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0
+
+- New look for the app, the F1 menu and the website, with colours shared in `assets/theme.css`
+- F1 menu: search, collapsible mods, per-setting reset, slightly see-through
+- Mods are turned on and off in the app only
+- Freecam (F3) that leaves your character alone and restores the view afterwards
+- First person: your body faces where you look
+- New logo and icons
+
 ## 1.0.0
 
 First release.
