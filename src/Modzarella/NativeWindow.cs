@@ -3,13 +3,13 @@ using Photino.NET;
 
 namespace Modzarella;
 
-static class NoFullscreen
+static class NativeWindow
 {
     public static void Apply(PhotinoWindow window)
     {
         window.RegisterMaximizedHandler((_, _) => window.SetMaximized(false));
         if (OperatingSystem.IsWindows()) Windows(window.WindowHandle);
-        else if (OperatingSystem.IsMacOS()) Mac();
+        else if (OperatingSystem.IsMacOS()) { Mac(); AboutItem(); }
     }
 
     const int GwlStyle = -16;
@@ -33,6 +33,20 @@ static class NoFullscreen
         }
     }
 
+    // "About Modzarella" at the top of the app menu, showing the standard panel built from Info.plist
+    static void AboutItem()
+    {
+        var app = Send(objc_getClass("NSApplication"), Sel("sharedApplication"));
+        var appMenu = Send(Send(Send(app, Sel("mainMenu")), Sel("itemAtIndex:"), 0), Sel("submenu"));
+        if (appMenu == 0) return;
+        var item = SendInit(Send(objc_getClass("NSMenuItem"), Sel("alloc")), Sel("initWithTitle:action:keyEquivalent:"),
+            NSString("About Modzarella"), Sel("orderFrontStandardAboutPanel:"), NSString(""));
+        SendInsert(appMenu, Sel("insertItem:atIndex:"), Send(objc_getClass("NSMenuItem"), Sel("separatorItem")), 0);
+        SendInsert(appMenu, Sel("insertItem:atIndex:"), item, 0);
+    }
+
+    static IntPtr NSString(string s) => SendStr(objc_getClass("NSString"), Sel("stringWithUTF8String:"), s);
+
     const string ObjC = "/usr/lib/libobjc.A.dylib";
     static IntPtr Sel(string name) => sel_registerName(name);
     [DllImport(ObjC)] static extern IntPtr objc_getClass(string name);
@@ -40,4 +54,7 @@ static class NoFullscreen
     [DllImport(ObjC, EntryPoint = "objc_msgSend")] static extern nint Send(IntPtr target, IntPtr sel);
     [DllImport(ObjC, EntryPoint = "objc_msgSend")] static extern nint Send(IntPtr target, IntPtr sel, nint arg);
     [DllImport(ObjC, EntryPoint = "objc_msgSend")] static extern void SendBool(IntPtr target, IntPtr sel, bool arg);
+    [DllImport(ObjC, EntryPoint = "objc_msgSend")] static extern IntPtr SendStr(IntPtr target, IntPtr sel, [MarshalAs(UnmanagedType.LPUTF8Str)] string arg);
+    [DllImport(ObjC, EntryPoint = "objc_msgSend")] static extern IntPtr SendInit(IntPtr target, IntPtr sel, IntPtr title, IntPtr action, IntPtr key);
+    [DllImport(ObjC, EntryPoint = "objc_msgSend")] static extern void SendInsert(IntPtr target, IntPtr sel, IntPtr item, nint index);
 }
