@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.1
 
 - Mods are downloaded from modza.space/Modz; existing installs switch over automatically
 
