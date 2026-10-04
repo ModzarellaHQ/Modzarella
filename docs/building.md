@@ -7,8 +7,8 @@ src/
   Modzarella/          the desktop app (.NET 10)
     Services/          finding the game, BepInEx, the mod catalog, settings
     Web/               the UI (ui.html) and the local server behind it
-    Runtime/           prebuilt Modzarella.Core.dll, bundled into the app
-  Modzarella.Core/     the in-game part: F1 menu, camera, shared API for mods
+    Runtime/           prebuilt Core and MoonSharp DLLs, bundled into the app
+  Modzarella.Core/     the in-game part: F1 menu, camera, game tweaks and the Lua engine (MoonSharp, in lib/)
 scripts/package.sh     builds the downloads for each system
 assets/branding/       icon and banner
 ```
@@ -34,7 +34,7 @@ dotnet build src/Modzarella.Core -c Release
 dotnet build src/Modzarella.Core -c Release -p:GameDir="/path/to/Cheese Rolling"
 ```
 
-The build writes `src/Modzarella/Runtime/Modzarella.Core.dll`. Commit that file, because CI can't build Core without the game. The app installs it to `BepInEx/plugins/Modzarella/` every time you press Play.
+The build writes `src/Modzarella/Runtime/Modzarella.Core.dll` and `MoonSharp.Interpreter.dll`. Commit them, because CI can't build Core without the game. The app installs them to `BepInEx/plugins/Modzarella/` every time you press Play. Lua mods are loaded from `BepInEx/plugins/Modz/<id>/`; see [Lua mods](lua-api.md).
 
 ## Command line
 
