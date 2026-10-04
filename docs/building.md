@@ -10,7 +10,7 @@ src/
     Runtime/           prebuilt Core and MoonSharp DLLs, bundled into the app
   Modzarella.Core/     the in-game part: F1 menu, camera, game tweaks and the Lua engine (MoonSharp, in lib/)
 scripts/package.sh     builds the downloads for each system
-assets/branding/       icon and banner
+assets/branding/       logo, app icons and banner
 ```
 
 ## The app
