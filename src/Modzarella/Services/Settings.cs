@@ -7,6 +7,7 @@ public class Settings
     public const string DefaultSource = "https://modza.space/modz/";
     public string Source { get; set; } = DefaultSource;
     public string? GameDir { get; set; }
+    public bool AutoUpdate { get; set; } = true;
 
     static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Modzarella", "settings.json");
 

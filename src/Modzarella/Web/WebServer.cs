@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace Modzarella;
@@ -9,6 +10,21 @@ public static class Web
 {
     static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
     static readonly SemaphoreSlim busy = new(1, 1);
+    static Task<(string Version, string Url)?>? appUpdate;
+
+    static async Task<(string Version, string Url)?> LatestApp(HttpClient http)
+    {
+        try
+        {
+            var latest = await http.GetFromJsonAsync<JsonElement>("https://api.github.com/repos/ModzarellaHQ/Modzarella/releases/latest");
+            var tag = latest.GetProperty("tag_name").GetString()!.TrimStart('v');
+            var current = typeof(Web).Assembly.GetName().Version!;
+            return Version.TryParse(tag, out var v) && v > new Version(current.Major, current.Minor, current.Build)
+                ? (tag, latest.GetProperty("html_url").GetString()!)
+                : null;
+        }
+        catch { return null; }
+    }
 
     static readonly Dictionary<string, (string Resource, string Type)> files = new()
     {
@@ -118,9 +134,13 @@ public static class Web
         string? error = null;
         try { mods = await new Catalog(settings.Source, http).Mods(); }
         catch (Exception e) { error = $"Can't read the mod source: {e.Message}"; }
+        appUpdate ??= LatestApp(http);
+        var app = await appUpdate;
         return new
         {
             source = settings.Source,
+            autoUpdate = settings.AutoUpdate,
+            appUpdate = app == null ? null : new { version = app.Value.Version },
             gameDir = settings.GameDir,
             game = game == null ? null : new { Dir = Pretty(game.Dir), platform = game.Platform.ToString(), loader = game.LoaderInstalled },
             mods = mods.Select(m => new { mod = m, state = game == null ? "NotInstalled" : Catalog.StateOf(game, m).ToString() }),
@@ -131,6 +151,13 @@ public static class Web
     static async Task<List<string>> Do(Settings settings, HttpClient http, Request r)
     {
         if (r.Action == "source") { settings.Source = r.Value!.Trim(); settings.Save(); return ["Source set."]; }
+        if (r.Action == "autoupdate") { settings.AutoUpdate = r.Value == "true"; settings.Save(); return [settings.AutoUpdate ? "Mods update automatically." : "Automatic updates off."]; }
+        if (r.Action == "release")
+        {
+            if ((await (appUpdate ??= LatestApp(http))) is not { } rel) return ["You have the latest Modzarella."];
+            Process.Start(new ProcessStartInfo(rel.Url) { UseShellExecute = true });
+            return [$"Opened the Modzarella {rel.Version} download page."];
+        }
         if (r.Action == "game") { settings.GameDir = string.IsNullOrWhiteSpace(r.Value) ? null : r.Value.Trim(); settings.Save(); return ["Game folder set."]; }
         var game = Game.Find(settings.GameDir) ?? throw new Exception("Cheese Rolling not found. Set the game folder.");
         var catalog = new Catalog(settings.Source, http);
@@ -159,6 +186,7 @@ public static class Web
             case "update": return await catalog.UpdateAll(game);
             case "launch":
                 var steps = new List<string>();
+                if (settings.AutoUpdate) steps.AddRange((await catalog.UpdateAll(game)).Where(l => !l.StartsWith("Everything")));
                 if (!game.LoaderInstalled) steps.Add(await Loader.Install(game, http));
                 if (CoreRuntime.Ensure(game) is { } core) steps.Add(core);
                 steps.Add(game.Launch());
