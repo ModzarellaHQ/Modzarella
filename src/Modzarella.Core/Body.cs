@@ -244,6 +244,12 @@ namespace Modz
         {
             if (CameraFeature.Flying && ModCommon.IsLocal(__instance)) heading = CameraFeature.flyHeading;
             else if (Body.Heading(__instance, out var h) && h.sqrMagnitude > 1e-4f) heading = h.normalized;
+            else if (CameraFeature.Instance && CameraFeature.Instance.FPActive && ModCommon.IsLocal(__instance) && StageManager.Instance)
+            {
+                // first person: the body faces where you look
+                var f = Vector3.ProjectOnPlane(StageManager.Instance.cameraRig.mainCamera.transform.forward, Vector3.up);
+                if (f.sqrMagnitude > 1e-4f) heading = f.normalized;
+            }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(ActiveRagdoll), nameof(ActiveRagdoll.Input))]
