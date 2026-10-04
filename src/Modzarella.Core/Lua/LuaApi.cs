@@ -41,7 +41,7 @@ namespace Modz
             typeof(Vector2), typeof(Vector3), typeof(Quaternion), typeof(Color), typeof(Mathf), typeof(Time), typeof(Physics),
             typeof(GameObject), typeof(PrimitiveType), typeof(ForceMode), typeof(LightType), typeof(LightShadows),
             typeof(RigidbodyInterpolation), typeof(CollisionDetectionMode), typeof(PhysicMaterialCombine), typeof(AudioRolloffMode),
-            typeof(Space), typeof(Keyboard), typeof(Mouse), typeof(Gamepad), typeof(GameManager), typeof(StageManager),
+            typeof(Space), typeof(LayerMask), typeof(Keyboard), typeof(Mouse), typeof(Gamepad), typeof(GameManager), typeof(StageManager),
         };
 
         static Table List(Script s, System.Collections.IEnumerable items)
@@ -121,6 +121,8 @@ namespace Modz
             g["add"] = Fn(s, a => a[0].ToObject<GameObject>().AddComponent(FindType(a[1].String)));
             g["get"] = Fn(s, a => { var c = a[0].ToObject<Component>(); var t = FindType(a[1].String); var go = a[0].ToObject() as GameObject; return go ? go.GetComponent(t) : c ? c.GetComponent(t) : null; });
             g["find"] = (Func<string, GameObject>)GameObject.Find;
+            g["components"] = Fn(s, a => List(s, Target(a[0]).GetComponents(FindType(a[1].String))));
+            g["children"] = Fn(s, a => List(s, Target(a[0]).GetComponentsInChildren(FindType(a[1].String), Arg(a, 2, false))));
 
             var setting = new Table(s);
             setting["number"] = Fn(s, a =>
@@ -329,6 +331,7 @@ namespace Modz
                 if (m.HasProperty("_EmissionColor")) { m.EnableKeyword("_EMISSION"); m.SetColor("_EmissionColor", c * Arg(a, 1, 1f)); }
                 return m;
             });
+            mat["vignette"] = Fn(s, a => Theme.Vignette());
             mat["blob"] = Fn(s, a => ModCommon.BlobTexture(Arg(a, 0, 64), Arg(a, 1, 0f), Arg(a, 2, 1)));
             g["mat"] = mat;
 
@@ -380,6 +383,8 @@ namespace Modz
             ui["bar"] = Fn(s, a => { Theme.Bar(new Rect((float)a[0].Number, (float)a[1].Number, (float)a[2].Number, (float)a[3].Number), (float)a[4].Number, Arg(a, 5, Theme.Accent)); return null; });
             g["ui"] = ui;
         }
+
+        static GameObject Target(DynValue d) => d.ToObject() is Component c ? c.gameObject : d.ToObject<GameObject>();
 
         static CollisionRelay Relay(LuaMod mod, DynValue target)
         {

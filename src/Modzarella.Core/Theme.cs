@@ -96,6 +96,24 @@ namespace Modz
             GUI.matrix = m;
         }
 
+        static Texture2D vignette;
+
+        public static Texture2D Vignette()
+        {
+            if (vignette) return vignette;
+            const int n = 128;
+            vignette = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            for (int y = 0; y < n; y++)
+            for (int x = 0; x < n; x++)
+            {
+                float dx = x / (n - 1f) * 2f - 1f, dy = y / (n - 1f) * 2f - 1f;
+                float d = Mathf.Sqrt(dx * dx + dy * dy) / 1.414f;
+                vignette.SetPixel(x, y, new Color(1, 1, 1, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.35f, 1f, d))));
+            }
+            vignette.Apply();
+            return vignette;
+        }
+
         public static void Bar(Rect r, float frac, Color fill)
         {
             GUI.Box(r, GUIContent.none, Box(new Color(0f, 0f, 0f, 0.55f), 4));
