@@ -104,6 +104,7 @@ namespace Modz
 
         public static DynValue Invoke(LuaMod mod, DynValue fn, params object[] args)
         {
+            if (fn.Type == DataType.Function && fn.Function.OwnerScript != mod.Script) return DynValue.Nil;
             try { return mod.Script.Call(fn, args); }
             catch (Exception e) { Fail(mod, e); return DynValue.Nil; }
         }
@@ -170,7 +171,8 @@ namespace Modz
         internal LuaMod Mod;
         internal DynValue OnHit, OnStay;
 
-        void OnCollisionEnter(Collision c) { if (OnHit != null && Mod.Running) LuaEngine.Invoke(Mod, OnHit, c); }
-        void OnCollisionStay(Collision c) { if (OnStay != null && Mod.Running) LuaEngine.Invoke(Mod, OnStay, c); }
+        bool Current(DynValue fn) => fn != null && Mod.Running && fn.Function.OwnerScript == Mod.Script;
+        void OnCollisionEnter(Collision c) { if (Current(OnHit)) LuaEngine.Invoke(Mod, OnHit, c); }
+        void OnCollisionStay(Collision c) { if (Current(OnStay)) LuaEngine.Invoke(Mod, OnStay, c); }
     }
 }
