@@ -2,6 +2,8 @@
 
 ## 1.1.3
 
+- Mods update automatically when the app opens and before playing (can be turned off in Settings)
+- The app tells you when a new version of Modzarella is out
 - Restart map (F6) and next map (F7) shortcuts
 - Settings: open the game and mods folders and the game log, reset mod settings
 - Blood and other marks lie on the ground instead of floating, and always appear
