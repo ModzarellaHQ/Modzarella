@@ -13,6 +13,6 @@
   <ItemGroup>
     <PackageReference Include="Photino.NET" Version="4.0.16" />
     <EmbeddedResource Include="Web/ui.html" LogicalName="ui.html" />
-    <EmbeddedResource Include="Runtime/Modzarella.Core.dll" LogicalName="Modzarella.Core.dll" />
+    <EmbeddedResource Include="Runtime/*.dll" LogicalName="runtime/%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>
