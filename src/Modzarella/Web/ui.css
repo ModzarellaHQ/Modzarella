@@ -4,12 +4,25 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box }
+::-webkit-scrollbar { width: 10px; height: 10px }
+::-webkit-scrollbar-track { background: var(--bg) }
+::-webkit-scrollbar-thumb { background: var(--control); border: 2px solid var(--bg) }
+::-webkit-scrollbar-thumb:hover { background: var(--control-hover) }
+::-webkit-scrollbar-corner { background: var(--bg) }
 [hidden] { display: none !important }
 html, body { height: 100% }
 body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 var(--sans); user-select: none; -webkit-user-select: none; display: flex; flex-direction: column }
 
 header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line) }
 header strong { font-size: 15px }
+.version { color: var(--dim); font: 11px var(--mono) }
+.play { background: var(--accent); color: var(--on-accent); font-weight: 600; padding: 8px 18px; min-width: 96px }
+.play:hover { background: var(--accent-hover) }
+.play.stop { background: var(--control); color: var(--text) }
+.play.stop:hover { background: var(--bad) }
+.mod .action { min-width: 80px }
+.about p { margin: 0; color: var(--dim); line-height: 1.6 }
+.about strong { color: var(--text) }
 .where { flex: 1; min-width: 0; font: 11px var(--mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 
 button { font: 500 12px/1 var(--sans); color: var(--text); background: var(--control); border: 0; padding: 7px 12px; cursor: pointer }
@@ -53,5 +66,6 @@ input[type=checkbox]:checked { background: var(--accent) url("data:image/svg+xml
 input[type=text], input[type=search] { flex: 1; min-width: 0; background: var(--field); color: var(--text); border: 1px solid var(--line); padding: 6px 8px; font: 12px var(--mono); user-select: text }
 .danger:hover { background: var(--bad) }
 
-footer { font: 11px/1.5 var(--mono); color: var(--dim); padding: 6px 16px; border-top: 1px solid var(--line); white-space: pre-wrap; max-height: 80px; overflow: auto }
-footer.busy { color: var(--accent) }
+.toast { position: fixed; right: 12px; bottom: 12px; max-width: min(520px, 70vw); max-height: 40vh; overflow: auto; padding: 8px 12px; background: var(--surface); border: 1px solid var(--line); font: 11px/1.5 var(--mono); color: var(--dim); white-space: pre-wrap; box-shadow: 0 4px 16px rgb(0 0 0 / .4) }
+.toast.busy { color: var(--accent) }
+.toast.bad { color: var(--bad) }

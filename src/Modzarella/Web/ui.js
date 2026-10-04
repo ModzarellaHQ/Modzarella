@@ -1,31 +1,46 @@
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const doing = { install: 'Installing', enable: 'Turning on', disable: 'Turning off', remove: 'Uninstalling', update: 'Updating', launch: 'Starting the game', loader: 'Installing the mod loader', unloader: 'Removing everything', reset: 'Resetting mod settings', open: 'Opening', release: 'Opening the download page' };
-let busy = false, mods = [], firstLoad = true;
+const doing = { install: 'Installing', enable: 'Turning on', disable: 'Turning off', remove: 'Uninstalling', update: 'Updating', launch: 'Starting the game', stop: 'Stopping the game', loader: 'Installing the mod loader', unloader: 'Removing everything', reset: 'Resetting mod settings', open: 'Opening', release: 'Opening the download page', link: 'Opening' };
+const tabs = ['installed', 'browse', 'settings'];
+let busy = false, mods = [], current = 'installed', firstLoad = true, hideLog;
 
 function tab(name) {
-  $('tabMods').setAttribute('aria-selected', name === 'mods');
-  $('tabSettings').setAttribute('aria-selected', name === 'settings');
-  $('mods').hidden = $('search').hidden = name !== 'mods';
+  current = name;
+  for (const t of tabs) $('tab' + t[0].toUpperCase() + t.slice(1)).setAttribute('aria-selected', t === name);
+  $('mods').hidden = $('search').hidden = name === 'settings';
   $('settings').hidden = name !== 'settings';
+  render();
+}
+
+function row({ mod, state }) {
+  const id = esc(mod.id);
+  const meta = `<span class="meta">${esc(mod.version)} · ${esc(mod.author)}</span>${state === 'UpdateAvailable' ? '<span class="meta update">update ready</span>' : ''}`;
+  const body = `<div class="body"><div class="name">${esc(mod.name)}${meta}</div><p title="${esc(mod.description)}">${esc(mod.description)}</p></div>`;
+  if (state === 'NotInstalled')
+    return `<div class="mod">${body}<button class="primary action" data-act="install" data-id="${id}">Install</button></div>`;
+  const on = state !== 'Disabled';
+  return `<div class="mod">
+    <input type="checkbox" aria-label="${esc(mod.name)}" title="${on ? 'On' : 'Off'}" ${on ? 'checked' : ''} data-id="${id}">
+    ${body}
+    <button class="link" data-act="remove" data-id="${id}">Uninstall</button>
+  </div>`;
 }
 
 function render() {
+  if (current === 'settings') return;
   const q = $('search').value.toLowerCase();
-  const shown = mods.filter(({ mod }) => (mod.name + ' ' + mod.description).toLowerCase().includes(q));
-  $('mods').innerHTML = shown.map(({ mod, state }) => {
-    const on = state === 'Enabled' || state === 'UpdateAvailable';
-    const installed = state !== 'NotInstalled';
-    const id = esc(mod.id);
-    return `<div class="mod">
-      <input type="checkbox" aria-label="${esc(mod.name)}" title="${on ? 'On' : 'Off'}" ${on ? 'checked' : ''} data-id="${id}" data-on="${installed ? 'enable' : 'install'}">
-      <div class="body">
-        <div class="name">${esc(mod.name)}<span class="meta">${esc(mod.version)} · ${esc(mod.author)}</span>${state === 'UpdateAvailable' ? '<span class="meta update">update ready</span>' : ''}</div>
-        <p title="${esc(mod.description)}">${esc(mod.description)}</p>
-      </div>
-      ${installed ? `<button class="link" data-act="remove" data-id="${id}">Uninstall</button>` : ''}
-    </div>`;
-  }).join('') || `<p class="empty">${mods.length ? 'No mods match.' : 'No mods yet. Check the mod source in Settings.'}</p>`;
+  const inTab = mods.filter(m => (current === 'installed') === (m.state !== 'NotInstalled'));
+  const shown = inTab.filter(({ mod }) => (mod.name + ' ' + mod.description).toLowerCase().includes(q));
+  const empty = inTab.length
+    ? 'No mods match.'
+    : current === 'installed' ? 'No mods installed yet. Find some in Browse.' : mods.length ? 'You have every mod.' : 'No mods found. Check the mod source in Settings.';
+  $('mods').innerHTML = shown.map(row).join('') || `<p class="empty">${empty}</p>`;
+}
+
+function setRunning(running) {
+  $('play').textContent = running ? '■ Stop' : '▶ Play';
+  $('play').dataset.act = running ? 'stop' : 'launch';
+  $('play').classList.toggle('stop', running);
 }
 
 async function load() {
@@ -36,14 +51,18 @@ async function load() {
   $('error').textContent = problem;
   $('error').hidden = !problem;
   if (!s.game) tab('settings');
+  $('version').textContent = $('aboutVersion').textContent = s.version;
   $('game').textContent = s.game ? s.game.dir : 'Cheese Rolling not found';
   $('loader').textContent = s.game?.loader ? 'Repair mod loader' : 'Install mod loader';
   $('updateAll').hidden = !s.mods.some(m => m.state === 'UpdateAvailable');
   $('autoUpdate').checked = s.autoUpdate;
   $('appUpdate').hidden = !s.appUpdate;
   if (s.appUpdate) $('appVersion').textContent = s.appUpdate.version;
+  setRunning(s.running);
   mods = s.mods;
-  $('tabMods').textContent = `Mods (${mods.length})`;
+  const installed = mods.filter(m => m.state !== 'NotInstalled').length;
+  $('tabInstalled').textContent = `Installed (${installed})`;
+  $('tabBrowse').textContent = `Browse (${mods.length - installed})`;
   render();
   if (firstLoad && s.autoUpdate && s.mods.some(m => m.state === 'UpdateAvailable')) { firstLoad = false; await act('update'); }
   firstLoad = false;
@@ -62,16 +81,29 @@ async function act(action, id, value) {
   if (busy) return;
   busy = true;
   document.querySelectorAll('button, input').forEach(b => b.disabled = true);
-  $('log').classList.add('busy');
-  $('log').textContent = `${doing[action] ?? 'Saving'}${id ? ' ' + id : ''}…`;
+  clearTimeout(hideLog);
+  const log = $('log');
+  log.className = 'toast busy';
+  log.hidden = false;
+  log.textContent = `${doing[action] ?? 'Saving'}${id ? ' ' + id : ''}…`;
+  let failed = false;
   try {
     const r = await (await fetch('/api/do', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, id, value }) })).json();
-    $('log').textContent = r.error ? 'Error: ' + r.error : r.log.join('\n');
-  } catch (e) { $('log').textContent = 'Error: ' + e; }
-  $('log').classList.remove('busy');
+    failed = !!r.error;
+    log.textContent = failed ? 'Error: ' + r.error : r.log.join('\n');
+  } catch (e) { failed = true; log.textContent = 'Error: ' + e; }
+  log.className = failed ? 'toast bad' : 'toast';
+  hideLog = setTimeout(() => log.hidden = true, failed ? 10000 : 4000);
   busy = false;
   document.querySelectorAll('button, input').forEach(b => b.disabled = false);
   await load();
+}
+
+async function poll() {
+  if (!busy && !document.hidden) {
+    try { setRunning((await (await fetch('/api/status')).json()).running); } catch { }
+  }
+  setTimeout(poll, 2000);
 }
 
 document.addEventListener('click', e => {
@@ -83,9 +115,10 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('change', e => {
   const c = e.target;
-  if (c.matches('input[type=checkbox][data-id]')) act(c.checked ? c.dataset.on : 'disable', c.dataset.id);
+  if (c.matches('input[type=checkbox][data-id]')) act(c.checked ? 'enable' : 'disable', c.dataset.id);
   else if (c.id === 'autoUpdate') act('autoupdate', null, String(c.checked));
 });
 $('search').addEventListener('input', render);
 
-load();
+if (tabs.includes(location.hash.slice(1))) tab(location.hash.slice(1));
+load().then(poll);

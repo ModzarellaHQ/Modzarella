@@ -11,12 +11,14 @@
 <body>
 <header>
   <strong>Modzarella</strong>
+  <span class="version" id="version"></span>
   <span class="where" id="game">Looking for Cheese Rolling…</span>
   <button id="updateAll" data-act="update" hidden>Update all</button>
-  <button class="primary" data-act="launch">Play</button>
+  <button class="play" id="play" data-act="launch">▶ Play</button>
 </header>
 <nav role="tablist">
-  <button role="tab" id="tabMods" aria-selected="true" data-tab="mods">Mods</button>
+  <button role="tab" id="tabInstalled" aria-selected="true" data-tab="installed">Installed</button>
+  <button role="tab" id="tabBrowse" aria-selected="false" data-tab="browse">Browse</button>
   <button role="tab" id="tabSettings" aria-selected="false" data-tab="settings">Settings</button>
   <input type="search" id="search" placeholder="Search" aria-label="Search mods">
 </nav>
@@ -53,8 +55,18 @@
         <button class="danger" data-act="unloader" data-confirm="Click again to remove everything">Remove all mods</button>
       </div>
     </div>
+    <div class="field about">
+      <label>About</label>
+      <p><strong>Modzarella <span id="aboutVersion"></span></strong><br>A mod manager for Cheese Rolling. Free software under the MIT License. Not affiliated with the developers of Cheese Rolling.</p>
+      <div class="row">
+        <button data-act="link" data-value="site">Website</button>
+        <button data-act="link" data-value="github">Source code</button>
+        <button data-act="link" data-value="issues">Report a problem</button>
+        <button data-act="link" data-value="license">Licence</button>
+      </div>
+    </div>
   </div>
 </main>
-<footer id="log">Ready.</footer>
+<div class="toast" id="log" role="status" hidden></div>
 </body>
 </html>
