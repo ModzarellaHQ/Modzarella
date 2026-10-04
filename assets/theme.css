@@ -1,0 +1,16 @@
+/* Modzarella theme, shared by the app, the website and the in-game F1 menu.
+   To restyle the game menu, copy this file to BepInEx/config/modz.theme.css and edit it. */
+:root {
+  --bg: #17171a;
+  --surface: #1f1f23;
+  --line: #2e2e34;
+  --control: #34343b;
+  --control-hover: #43434c;
+  --field: #0e0e10;
+  --text: #ececef;
+  --dim: #8f8f99;
+  --accent: #f2b33d;
+  --accent-hover: #f7c766;
+  --on-accent: #17171a;
+  --bad: #ef5350;
+}

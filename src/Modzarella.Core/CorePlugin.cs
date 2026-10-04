@@ -181,7 +181,7 @@ namespace Modz
             bool open = searching || expanded.Contains(p.Name);
 
             var head = GUILayoutUtility.GetRect(1, 30, GUILayout.ExpandWidth(true));
-            Theme.Rect(head, Theme.Row);
+            Theme.Rect(head, Theme.Surface);
             if (p.Enabled != null) p.Enabled.Value = GUI.Toggle(new Rect(head.x + 12, head.y + 7, 16, 16), p.Enabled.Value, GUIContent.none, Theme.Toggle);
             float x = head.x + (p.Enabled != null ? 36 : 12);
             var nameStyle = Theme.TextStyle(13, p.Error != null ? Theme.Bad : Theme.TextColor, "left", true);

@@ -43,4 +43,7 @@
     <Reference Include="$(ManagedDir)/UnityEngine.ParticleSystemModule.dll" Private="false" />
     <Reference Include="lib/MoonSharp.Interpreter.dll" Private="true" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../assets/theme.css" LogicalName="theme.css" />
+  </ItemGroup>
 </Project>

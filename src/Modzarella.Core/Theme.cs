@@ -1,20 +1,42 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using BepInEx;
 using UnityEngine;
 
 namespace Modz
 {
-    // Flat dark look shared with the app and the website.
+    // Colours come from theme.css, shared with the app and the website.
     public static class Theme
     {
-        public static readonly Color Bg = Hex(0x18181b), Row = Hex(0x222226), Line = Hex(0x303036), TextColor = Hex(0xececef),
-            Dim = Hex(0x9a9aa3), Accent = Hex(0xf2b33d), Bad = Hex(0xef5350);
+        static readonly Dictionary<string, string> vars = Load();
+        public static readonly Color Bg = Var("bg"), Surface = Var("surface"), Line = Var("line"), Control = Var("control"), ControlHover = Var("control-hover"),
+            FieldBg = Var("field"), TextColor = Var("text"), Dim = Var("dim"), Accent = Var("accent"), AccentHover = Var("accent-hover"),
+            OnAccent = Var("on-accent"), Bad = Var("bad");
 
         static Font sans, mono;
         static readonly Dictionary<string, GUIStyle> textStyles = new Dictionary<string, GUIStyle>();
         static readonly Dictionary<Color, Texture2D> solids = new Dictionary<Color, Texture2D>();
 
-        static Color Hex(int rgb) => new Color(((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f);
+        static Dictionary<string, string> Load()
+        {
+            string css = null;
+            try
+            {
+                var custom = Path.Combine(Paths.ConfigPath, "modz.theme.css");
+                if (File.Exists(custom)) css = File.ReadAllText(custom);
+            }
+            catch { }
+            if (css == null)
+                using (var s = typeof(Theme).Assembly.GetManifestResourceStream("theme.css"))
+                    css = s == null ? "" : new StreamReader(s).ReadToEnd();
+            var d = new Dictionary<string, string>();
+            foreach (Match m in Regex.Matches(css, @"--([\w-]+)\s*:\s*([^;]+);")) d[m.Groups[1].Value] = m.Groups[2].Value.Trim();
+            return d;
+        }
+
+        static Color Var(string name) => vars.TryGetValue(name, out var v) && ColorUtility.TryParseHtmlString(v, out var c) ? c : Color.magenta;
 
         // the game renders in linear space; colours here are sRGB like the app and website
         public static Color C(Color c) => QualitySettings.activeColorSpace == ColorSpace.Linear ? c.linear : c;
@@ -61,7 +83,7 @@ namespace Modz
             GUI.matrix = m;
         }
 
-        public static void Panel(Rect r, float alpha = 0.96f)
+        public static void Panel(Rect r, float alpha = 0.97f)
         {
             Rect(r, new Color(Line.r, Line.g, Line.b, alpha));
             Rect(new Rect(r.x + 1, r.y + 1, r.width - 2, r.height - 2), new Color(Bg.r, Bg.g, Bg.b, alpha));
@@ -69,38 +91,39 @@ namespace Modz
 
         static GUIStyle button, accentButton, field, toggle, slider, thumb;
 
-        static GUIStyle Flat(Color normal, Color hover, Color text, int size = 12)
+        static GUIStyle ControlStyle(Color normal, Color hover, Color text)
         {
-            return new GUIStyle
-            {
-                normal = { background = Solid(normal), textColor = C(text) },
-                hover = { background = Solid(hover), textColor = C(text) },
-                active = { background = Solid(Line), textColor = C(text) },
-                focused = { background = Solid(normal), textColor = C(text) },
-                font = Sans, fontSize = size, alignment = TextAnchor.MiddleCenter,
-                padding = new RectOffset(10, 10, 4, 4), margin = new RectOffset(0, 6, 2, 2), fixedHeight = 24,
-            };
+            var st = new GUIStyle { normal = { background = Solid(normal) }, hover = { background = Solid(hover) }, active = { background = Solid(Line) } };
+            st.normal.textColor = st.hover.textColor = st.active.textColor = C(text);
+            st.font = Sans; st.fontSize = 12; st.alignment = TextAnchor.MiddleCenter;
+            st.padding = new RectOffset(10, 10, 4, 4); st.margin = new RectOffset(0, 6, 2, 2); st.fixedHeight = 24;
+            return st;
         }
 
-        public static GUIStyle Button => button ?? (button = Flat(Hex(0x3c3c44), Hex(0x4c4c56), TextColor));
-        public static GUIStyle AccentButton => accentButton ?? (accentButton = Flat(Accent, Hex(0xf7c766), Hex(0x18181b)));
-        public static GUIStyle Field => field ?? (field = new GUIStyle(Flat(Hex(0x0f0f11), Hex(0x0f0f11), TextColor)) { font = Mono, alignment = TextAnchor.MiddleLeft, padding = new RectOffset(6, 6, 2, 2) });
+        public static GUIStyle Button => button ?? (button = ControlStyle(Control, ControlHover, TextColor));
+        public static GUIStyle AccentButton => accentButton ?? (accentButton = ControlStyle(Accent, AccentHover, OnAccent));
+
+        public static GUIStyle Field => field ?? (field = new GUIStyle(ControlStyle(FieldBg, FieldBg, TextColor))
+        {
+            font = Mono, alignment = TextAnchor.MiddleLeft, padding = new RectOffset(7, 7, 2, 2),
+            focused = { background = Solid(FieldBg), textColor = C(TextColor) },
+        });
 
         public static GUIStyle Toggle => toggle ?? (toggle = new GUIStyle
         {
-            normal = { background = Solid(Hex(0x4a4a53)) }, hover = { background = Solid(Hex(0x5a5a64)) },
-            onNormal = { background = Solid(Accent) }, onHover = { background = Solid(Hex(0xf7c766)) },
-            fixedWidth = 16, fixedHeight = 16, margin = new RectOffset(0, 4, 4, 4), border = new RectOffset(0, 0, 0, 0),
+            normal = { background = Solid(ControlHover) }, hover = { background = Solid(Dim) },
+            onNormal = { background = Solid(Accent) }, onHover = { background = Solid(AccentHover) },
+            fixedWidth = 16, fixedHeight = 16, margin = new RectOffset(0, 4, 4, 4),
         });
 
         public static GUIStyle Slider => slider ?? (slider = new GUIStyle
         {
-            normal = { background = Solid(Line) }, fixedHeight = 4, margin = new RectOffset(0, 8, 10, 10),
+            normal = { background = Solid(Control) }, fixedHeight = 4, margin = new RectOffset(0, 8, 10, 10),
         });
 
         public static GUIStyle Thumb => thumb ?? (thumb = new GUIStyle
         {
-            normal = { background = Solid(Accent) }, hover = { background = Solid(Hex(0xf7c766)) }, active = { background = Solid(TextColor) },
+            normal = { background = Solid(Accent) }, hover = { background = Solid(AccentHover) }, active = { background = Solid(TextColor) },
             fixedWidth = 10, fixedHeight = 14, margin = new RectOffset(0, 0, -5, 0),
         });
 
@@ -111,8 +134,11 @@ namespace Modz
         {
             var sk = GUI.skin;
             GUIStyle b = sk.verticalScrollbar, t = sk.verticalScrollbarThumb, up = sk.verticalScrollbarUpButton, down = sk.verticalScrollbarDownButton;
-            sk.verticalScrollbar = bar ?? (bar = new GUIStyle { normal = { background = Solid(Bg) }, fixedWidth = 6, margin = new RectOffset(0, 2, 2, 2) });
-            sk.verticalScrollbarThumb = barThumb ?? (barThumb = new GUIStyle { normal = { background = Solid(Hex(0x4a4a53)) }, hover = { background = Solid(Hex(0x5a5a64)) }, fixedWidth = 6 });
+            sk.verticalScrollbar = bar ?? (bar = new GUIStyle { fixedWidth = 6, margin = new RectOffset(0, 3, 3, 3) });
+            sk.verticalScrollbarThumb = barThumb ?? (barThumb = new GUIStyle
+            {
+                normal = { background = Solid(Control) }, hover = { background = Solid(ControlHover) }, fixedWidth = 6,
+            });
             sk.verticalScrollbarUpButton = sk.verticalScrollbarDownButton = none ?? (none = new GUIStyle { fixedWidth = 0, fixedHeight = 0 });
             try
             {
