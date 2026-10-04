@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4
+
+- Freecam stops cleanly when the map changes, and its key always turns it off
+
 ## 1.1.3
 
 - Mods update automatically when the app opens and before playing (can be turned off in Settings)

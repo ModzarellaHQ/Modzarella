@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Modz
 {
-    [BepInPlugin(GUID, "Modzarella", "1.1.3")]
+    [BepInPlugin(GUID, "Modzarella", "1.1.4")]
     public class CorePlugin : BaseUnityPlugin
     {
         public const string GUID = "modz.core";
