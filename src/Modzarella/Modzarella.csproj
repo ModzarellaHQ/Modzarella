@@ -8,8 +8,14 @@
     <AssemblyName>Modzarella</AssemblyName>
     <Version>1.1.4</Version>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <ApplicationIcon>../../assets/branding/icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.GC.ConserveMemory" Value="7" />
+    <RuntimeHostConfigurationOption Include="System.GC.RetainVM" Value="false" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Photino.NET" Version="4.0.16" />
     <EmbeddedResource Include="Web/ui.*" LogicalName="%(Filename)%(Extension)" />
