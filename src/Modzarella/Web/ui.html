@@ -21,6 +21,7 @@
   <input type="search" id="search" placeholder="Search" aria-label="Search mods">
 </nav>
 <main>
+  <p class="banner" id="appUpdate" hidden><span>Modzarella <span id="appVersion"></span> is out.</span> <button class="primary" data-act="release">Download</button></p>
   <p class="notice" id="error" hidden></p>
   <div id="mods"></div>
   <div class="settings" id="settings" hidden>
@@ -31,6 +32,10 @@
     <div class="field">
       <label for="source">Mod source: a URL, or a folder with an index.json.</label>
       <div class="row"><input type="text" id="source"><button data-act="source" data-from="source">Save</button></div>
+    </div>
+    <div class="field">
+      <label>Updates</label>
+      <label class="check"><input type="checkbox" id="autoUpdate"> Update mods automatically when the app opens and before playing</label>
     </div>
     <div class="field">
       <label>Open</label>

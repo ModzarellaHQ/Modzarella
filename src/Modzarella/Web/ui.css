@@ -28,6 +28,9 @@ nav button[aria-selected=true] { color: var(--text); border-bottom-color: var(--
 nav input { margin: 6px 0 6px auto; max-width: 200px }
 
 main { flex: 1; overflow: auto }
+.banner { display: flex; align-items: center; gap: 12px; padding: 8px 16px; margin: 0; background: var(--surface); border-bottom: 1px solid var(--line) }
+.banner button { margin-left: auto }
+.field .check { display: flex; align-items: center; gap: 8px; color: var(--text) }
 .notice { color: var(--bad); padding: 10px 16px; margin: 0; border-bottom: 1px solid var(--line) }
 
 .mod { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-bottom: 1px solid var(--line) }

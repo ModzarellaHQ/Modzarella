@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const doing = { install: 'Installing', enable: 'Turning on', disable: 'Turning off', remove: 'Uninstalling', update: 'Updating', launch: 'Starting the game', loader: 'Installing the mod loader', unloader: 'Removing everything', reset: 'Resetting mod settings', open: 'Opening' };
-let busy = false, mods = [];
+const doing = { install: 'Installing', enable: 'Turning on', disable: 'Turning off', remove: 'Uninstalling', update: 'Updating', launch: 'Starting the game', loader: 'Installing the mod loader', unloader: 'Removing everything', reset: 'Resetting mod settings', open: 'Opening', release: 'Opening the download page' };
+let busy = false, mods = [], firstLoad = true;
 
 function tab(name) {
   $('tabMods').setAttribute('aria-selected', name === 'mods');
@@ -39,9 +39,14 @@ async function load() {
   $('game').textContent = s.game ? s.game.dir : 'Cheese Rolling not found';
   $('loader').textContent = s.game?.loader ? 'Repair mod loader' : 'Install mod loader';
   $('updateAll').hidden = !s.mods.some(m => m.state === 'UpdateAvailable');
+  $('autoUpdate').checked = s.autoUpdate;
+  $('appUpdate').hidden = !s.appUpdate;
+  if (s.appUpdate) $('appVersion').textContent = s.appUpdate.version;
   mods = s.mods;
   $('tabMods').textContent = `Mods (${mods.length})`;
   render();
+  if (firstLoad && s.autoUpdate && s.mods.some(m => m.state === 'UpdateAvailable')) { firstLoad = false; await act('update'); }
+  firstLoad = false;
 }
 
 function confirmed(button) {
@@ -79,6 +84,7 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => {
   const c = e.target;
   if (c.matches('input[type=checkbox][data-id]')) act(c.checked ? c.dataset.on : 'disable', c.dataset.id);
+  else if (c.id === 'autoUpdate') act('autoupdate', null, String(c.checked));
 });
 $('search').addEventListener('input', render);
 
