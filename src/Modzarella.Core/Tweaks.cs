@@ -75,11 +75,9 @@ namespace Modz
             if (FreezeBots.Value) tags.Add("Bots frozen");
             if (SlowMo.Value) tags.Add("Slow motion");
             if (tags.Count == 0) return;
-            string text = string.Join("  ·  ", tags.ToArray());
-            var st = Theme.TextStyle(13, Theme.Accent, "center", true);
-            float w = st.CalcSize(new GUIContent(text)).x + 28;
-            GUI.Box(new Rect(18, 16, w, 30), GUIContent.none, Theme.Box(new Color(Theme.Bg.r, Theme.Bg.g, Theme.Bg.b, 0.85f), 15));
-            GUI.Label(new Rect(18, 16, w, 30), text, st);
+            string text = string.Join("  ·  ", tags.ToArray()).ToLowerInvariant();
+            float w = Theme.TextStyle(11, Theme.Brass, "center", true, false, true).CalcSize(new GUIContent(text)).x + 28;
+            Theme.Badge(new Rect(18, 16, w, 30), text);
         }
     }
 
