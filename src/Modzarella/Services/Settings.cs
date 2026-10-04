@@ -4,7 +4,7 @@ namespace Modzarella;
 
 public class Settings
 {
-    public const string DefaultSource = "https://modza.space/Modz/";
+    public const string DefaultSource = "https://modza.space/modz/";
     public string Source { get; set; } = DefaultSource;
     public string? GameDir { get; set; }
 
@@ -13,7 +13,7 @@ public class Settings
     public static Settings Load()
     {
         var s = File.Exists(FilePath) ? JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath)) ?? new() : new();
-        if (s.Source == "https://modzarellahq.github.io/Modz/") s.Source = DefaultSource;
+        if (s.Source is "https://modzarellahq.github.io/Modz/" or "https://modza.space/Modz/") s.Source = DefaultSource;
         return s;
     }
 
