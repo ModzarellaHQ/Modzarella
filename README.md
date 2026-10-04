@@ -19,12 +19,24 @@
 
 Modzarella is a mod manager for [Cheese Rolling](https://store.steampowered.com/app/3809440/). Pick your mods, press Play, and you're in.
 
+<p align="center">
+  <img src="docs/screenshots/app.jpg" alt="The Modzarella app" width="49%">
+  <img src="docs/screenshots/menu.jpg" alt="The F1 mod menu in game" width="49%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/bmw.jpg" alt="Driving the BMW" width="24%">
+  <img src="docs/screenshots/guns.jpg" alt="Shooting the AK-47 in first person" width="24%">
+  <img src="docs/screenshots/toilet.jpg" alt="Flying the rocket toilet" width="24%">
+  <img src="docs/screenshots/gore.jpg" alt="Gore after a crash" width="24%">
+</p>
+
 ## Features
 
 - **One-click setup:** finds the game and installs the mod loader for you
 - **Mod browser:** turn mods on and off, update or uninstall them with one click
 - **In-game menu:** press **F1** to tweak every mod's settings and keys while playing
-- **Built-in extras:** free mouse camera, first person and zoom, no mod needed
+- **Built-in extras:** free mouse camera, first person, zoom, endless rounds, frozen bots and slow motion
+- **Lua mods:** mods are plain Lua scripts, so making one needs no compiler
 - **Safe installs:** every download is checked before it touches your game
 - **Cross-platform:** native app for macOS, Windows and Linux
 
@@ -55,7 +67,7 @@ Something not working? See [Troubleshooting](docs/troubleshooting.md), or [open 
 
 ## Contributing
 
-- **Mods** live in [Modz](https://github.com/ModzarellaHQ/Modz). That's the place to make or share one.
+- **Mods** live in [Modz](https://github.com/ModzarellaHQ/Modz). Start with the [Lua API](docs/lua-api.md).
 - **The app:** see [CONTRIBUTING.md](CONTRIBUTING.md) and [Building](docs/building.md).
 
 ## License
