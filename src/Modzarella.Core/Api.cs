@@ -10,6 +10,12 @@ namespace Modz
 {
     public static class CheeseApi
     {
+        public static void RestartMap()
+        {
+            int map = System.Array.IndexOf(GameManager.Instance.maps, UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+            if (map >= 0) GameManager.Instance.LoadMap(map);
+        }
+
         public static ActiveRagdoll Driver;
         public static Rigidbody DriverVehicle;
         public static Func<bool> FirstPersonCheck;

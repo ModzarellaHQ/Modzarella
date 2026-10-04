@@ -181,6 +181,7 @@ namespace Modz
             game["menu_open"] = Fn(s, a => CorePlugin.MenuOpen);
             game["round_age"] = Fn(s, a => GameManager.Instance.roundTime - GameManager.Instance.countdownLength);
             game["next_round"] = Fn(s, a => { GameManager.Instance.LoadRandomMap(); return null; });
+            game["restart_map"] = Fn(s, a => { CheeseApi.RestartMap(); return null; });
             game["sfx"] = Fn(s, a => ModCommon.GameSfxVolume);
             game["set_seated"] = Fn(s, a => { CheeseApi.SetSeated(a[0].ToObject<ActiveRagdoll>(), a[1].CastToBool()); return null; });
             game["seated"] = (Func<ActiveRagdoll, bool>)CheeseApi.IsSeated;

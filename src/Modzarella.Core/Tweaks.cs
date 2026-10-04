@@ -12,7 +12,7 @@ namespace Modz
         public ConfigEntry<bool> Enabled, Endless, FreezeBots, SlowMo, VSyncOff;
         public ConfigEntry<int> FpsCap;
         public ConfigEntry<float> SlowMoSpeed;
-        public ConfigEntry<KeyboardShortcut> EndlessKey, FreezeKey, SlowMoKey;
+        public ConfigEntry<KeyboardShortcut> EndlessKey, FreezeKey, SlowMoKey, RestartKey, NextMapKey;
         private float baseFixedDt;
         private bool slowApplied;
 
@@ -29,6 +29,8 @@ namespace Modz
             EndlessKey = Config.Bind("Keys", "Endless round", new KeyboardShortcut(KeyCode.F2), "Toggle endless round.");
             FreezeKey = Config.Bind("Keys", "Freeze bots", new KeyboardShortcut(KeyCode.F4), "Toggle frozen bots.");
             SlowMoKey = Config.Bind("Keys", "Slow motion", new KeyboardShortcut(KeyCode.F5), "Toggle slow motion.");
+            RestartKey = Config.Bind("Keys", "Restart map", new KeyboardShortcut(KeyCode.F6), "Start the current map again.");
+            NextMapKey = Config.Bind("Keys", "Next map", new KeyboardShortcut(KeyCode.F7), "Go to the next map.");
             SlowMo.SettingChanged += (_, __) => ModCommon.Toast(SlowMo.Value ? "Slow motion" : "Normal speed");
             baseFixedDt = Time.fixedDeltaTime;
             Endless.SettingChanged += (_, __) => ModCommon.Toast(Endless.Value ? "Endless round on" : "Endless round off — 6 s left");
@@ -49,6 +51,9 @@ namespace Modz
             if (ModCommon.KeyDown(SlowMoKey.Value)) SlowMo.Value = !SlowMo.Value;
             if (ModCommon.KeyDown(EndlessKey.Value)) Endless.Value = !Endless.Value;
             if (ModCommon.KeyDown(FreezeKey.Value)) FreezeBots.Value = !FreezeBots.Value;
+            if (!ModCommon.InRound || !GameManager.Instance) return;
+            if (ModCommon.KeyDown(NextMapKey.Value)) GameManager.Instance.LoadRandomMap();
+            else if (ModCommon.KeyDown(RestartKey.Value)) CheeseApi.RestartMap();
         }
 
         private void ApplySlowMo()

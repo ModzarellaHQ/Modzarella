@@ -75,7 +75,7 @@ Define any of these as global functions. They only run during a round, in Play O
 | `game.grounded(r)`, `game.seated(r)` | State checks |
 | `game.counting_down()`, `game.paused()`, `game.menu_open()` | |
 | `game.round_age()` | Seconds since the round started |
-| `game.next_round()` | Load the next map |
+| `game.next_round()`, `game.restart_map()` | Load the next map, or the current one again |
 | `game.add_vehicle(rigidbody, wheels)`, `game.is_vehicle(rb)` | Register a vehicle (and its wheel transforms) so other mods can react to it |
 | `game.vehicles()` | Every registered vehicle: `{ body, wheels }` |
 | `game.set_driver(r, rb)`, `game.driver()` | Who is driving, for the camera and other mods |
