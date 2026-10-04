@@ -77,7 +77,8 @@ Define any of these as global functions. They only run during a round, in Play O
 | `game.counting_down()`, `game.paused()`, `game.menu_open()` | |
 | `game.round_age()` | Seconds since the round started |
 | `game.next_round()` | Load the next map |
-| `game.add_vehicle(rigidbody)`, `game.is_vehicle(rb)` | Mark your vehicle so other mods react to it |
+| `game.add_vehicle(rigidbody, wheels)`, `game.is_vehicle(rb)` | Register a vehicle (and its wheel transforms) so other mods can react to it |
+| `game.vehicles()` | Every registered vehicle: `{ body, wheels }` |
 | `game.set_driver(r, rb)`, `game.driver()` | Who is driving, for the camera and other mods |
 
 ## Bodies
@@ -162,6 +163,8 @@ Unity's own types are available: `Vector3`, `Quaternion`, `Color`, `Mathf`, `Tim
 | `camera.target(transform)` | Follow something else; `nil` follows you again |
 | `camera.shift(vec)`, `camera.fov(scale)` | Offset (right, up, forward) and zoom; reset to `Vector3.zero` and `1` |
 | `camera.shake(amount, decay)`, `camera.first_person()` | |
+| `camera.hide_arms(true)` | Hide your own arms in first person, for viewmodels |
+| `camera.flying()` | True while the freecam (F3) is on |
 | `camera.to_screen(point)` | Screen position for `ui`, or `nil` behind the camera |
 | `input.key("w")`, `input.key_down("enter")` | Keys by name: `w`, `space`, `leftShift`, `leftCtrl`, `upArrow`… |
 | `input.mouse(0)`, `input.mouse_down(1)` | 0 left, 1 right, 2 middle |
@@ -186,8 +189,8 @@ events.on("bullet_hit", function(part, point, dir, power) ... end)
 events.emit("bullet_hit", part, point, dir, power)
 ```
 
-Events in use: `bullet_hit` (Guns, handled by Gore) and `wheels_bloody` (Gore).
+Events in use: `bullet_hit(part, point, dir, power)` and `wheels_bloody(rigidbody, point)`. Emitting an event nobody listens to is fine, so mods never need each other installed.
 
 ## Speed
 
-Every call between Lua and the game costs a few microseconds. Per frame that's fine. For work on every ragdoll every physics step, use `hold` on muscles and only decide every few steps, the way Gore's ragdoll reactions do.
+Every call between Lua and the game costs a few microseconds. Per frame that's fine. For work on every ragdoll every physics step, use `hold` on muscles and only decide every few steps, the way Euphoria's reactions do.
