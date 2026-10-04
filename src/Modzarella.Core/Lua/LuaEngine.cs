@@ -13,6 +13,8 @@ namespace Modz
     public class LuaMod
     {
         public string Id, Name, Version, Description, Dir, Error;
+        internal float errorWindow;
+        internal int errorCount;
         public ConfigFile Config;
         public ConfigEntry<bool> Enabled;
         public Script Script;
@@ -77,7 +79,7 @@ namespace Modz
                 script.DoFile(Path.Combine(mod.Dir, "main.lua"));
                 CorePlugin.Log.LogInfo($"Lua mod {mod.Name} {mod.Version} loaded");
             }
-            catch (Exception e) { Fail(mod, e); }
+            catch (Exception e) { Fail(mod, e, true); }
         }
 
         public static void Reload(LuaMod mod)
@@ -88,11 +90,22 @@ namespace Modz
             if (mod.Error == null) ModCommon.Toast($"Reloaded {mod.Name}");
         }
 
-        static void Fail(LuaMod mod, Exception e)
+        static string Describe(Exception e)
         {
-            mod.Error = e is InterpreterException ie ? ie.DecoratedMessage ?? ie.Message : e.Message;
-            CorePlugin.Log.LogError($"[{mod.Name}] {mod.Error}\n{(e is InterpreterException ? "" : e.ToString())}");
-            ModCommon.Toast($"{mod.Name} stopped: {mod.Error}");
+            string msg = e is InterpreterException ie ? ie.DecoratedMessage ?? ie.Message : e.Message;
+            if (string.IsNullOrEmpty(msg) && e.InnerException != null) msg = e.InnerException.Message;
+            return string.IsNullOrEmpty(msg) ? e.GetType().Name : msg;
+        }
+
+        // one-off errors are logged; a mod that keeps failing is stopped
+        static void Fail(LuaMod mod, Exception e, bool fatal = false)
+        {
+            string msg = Describe(e);
+            if (Time.unscaledTime > mod.errorWindow) { mod.errorWindow = Time.unscaledTime + 10f; mod.errorCount = 0; }
+            if (++mod.errorCount <= 3) CorePlugin.Log.LogError($"[{mod.Name}] {msg}\n{e}");
+            if (!fatal && mod.errorCount < 30) return;
+            mod.Error = msg;
+            ModCommon.Toast($"{mod.Name} stopped: {msg}");
         }
 
         public static DynValue Call(LuaMod mod, string fn, params object[] args)
