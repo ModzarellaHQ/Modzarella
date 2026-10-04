@@ -55,15 +55,15 @@ namespace Modz
 
         public static GUIStyle TextStyle(int size, Color color, string align = "left", bool bold = false, bool wrap = false, bool monospace = false)
         {
-            string key = $"{size}|{color}|{align}|{bold}|{wrap}|{monospace}";
-            if (textStyles.TryGetValue(key, out var st)) return st;
-            st = new GUIStyle
-            {
-                font = monospace ? Mono : Sans, fontSize = size, fontStyle = bold ? FontStyle.Bold : FontStyle.Normal, wordWrap = wrap, richText = true,
-                normal = { textColor = C(color) },
-                alignment = align == "center" ? TextAnchor.MiddleCenter : align == "right" ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft,
-            };
-            return textStyles[key] = st;
+            string key = $"{size}|{align}|{bold}|{wrap}|{monospace}";
+            if (!textStyles.TryGetValue(key, out var st))
+                textStyles[key] = st = new GUIStyle
+                {
+                    font = monospace ? Mono : Sans, fontSize = size, fontStyle = bold ? FontStyle.Bold : FontStyle.Normal, wordWrap = wrap, richText = true,
+                    alignment = align == "center" ? TextAnchor.MiddleCenter : align == "right" ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft,
+                };
+            st.normal.textColor = C(color);
+            return st;
         }
 
         public static void Text(string text, Rect r, int size, Color color, string align = "left", bool bold = false, bool monospace = false) =>

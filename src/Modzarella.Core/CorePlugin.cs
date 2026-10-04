@@ -51,6 +51,7 @@ namespace Modz
             gameObject.AddComponent<CameraFeature>().Init(Config);
             gameObject.AddComponent<TweaksFeature>().Init(Config);
             gameObject.AddComponent<LuaEngine>().Init();
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (_, __) => Body.Prune();
         }
 
         public static void Toast(string msg)

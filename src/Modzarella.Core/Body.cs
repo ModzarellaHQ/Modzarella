@@ -204,6 +204,9 @@ namespace Modz
             noReach.RemoveWhere(k => !k);
             dead.RemoveWhere(k => !k);
             handsBusy.RemoveWhere(k => !k);
+            holds.Clear();
+            CheeseApi.PruneSeated();
+            Decals.Prune();
         }
 
         internal static float ArmStrength(ActiveRagdoll r) => armStrength.TryGetValue(r, out var m) ? m : 1f;

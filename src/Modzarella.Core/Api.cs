@@ -27,6 +27,8 @@ namespace Modz
         public static bool FirstPerson => FirstPersonCheck != null && FirstPersonCheck();
         public static bool IsDead(ActiveRagdoll r) => Body.IsDead(r);
         public static bool IsDriving(ActiveRagdoll r) => Driver && r && Driver == r;
+        internal static void PruneSeated() => seated.RemoveWhere(r => !r);
+
         public static bool IsSeated(ActiveRagdoll r) => r && (seated.Contains(r) || IsDriving(r));
         public static bool IsVehicle(Rigidbody rb) => rb && Vehicles.ContainsKey(rb);
 

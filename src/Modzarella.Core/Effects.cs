@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using MoonSharp.Interpreter;
 using UnityEngine;
@@ -226,6 +227,16 @@ namespace Modz
             queue.Enqueue(q);
             while (queue.Count > max) { var old = queue.Dequeue(); if (old) Object.Destroy(old); }
             return q;
+        }
+
+        internal static void Prune()
+        {
+            foreach (var q in pools.Values)
+            {
+                var alive = q.Where(g => g).ToList();
+                q.Clear();
+                foreach (var g in alive) q.Enqueue(g);
+            }
         }
 
         public static IEnumerable<GameObject> All(string pool) => pools.TryGetValue(pool, out var q) ? q : (IEnumerable<GameObject>)new GameObject[0];
