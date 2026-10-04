@@ -52,7 +52,7 @@ namespace Modz
 
         private readonly List<KeyValuePair<Transform, Vector3>> hidden = new List<KeyValuePair<Transform, Vector3>>();
 
-        // skinning happens before culling, so bones are shrunk at the end of LateUpdate and restored after rendering
+        // skinning runs before culling: shrink in LateUpdate, restore after rendering
         private void OnEnable() => Camera.onPostRender += ShowOwnHead;
         private void OnDisable() { Camera.onPostRender -= ShowOwnHead; ShowOwnHead(null); }
         private void FixedUpdate() => ShowOwnHead(null);
@@ -102,7 +102,7 @@ namespace Modz
             Flying = on;
             if (on)
             {
-                // the rig is frozen while flying and put back exactly as it was afterwards
+                // restored exactly when the freecam stops
                 savedPos = t.position; savedRot = t.rotation; savedYaw = rig.yaw; savedPitch = rig.pitch;
                 var me = ModCommon.LocalRagdoll();
                 flyHeading = me ? Body.Facing(me) : Vector3.forward;

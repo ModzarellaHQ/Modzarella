@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Modz
 {
-    // MoonSharp resolves operator overloads by reflection on every call; vectors are hot, so they get direct paths.
+    // MoonSharp finds operators by reflection; vectors get a fast paths.
     class FastVector3 : IUserDataDescriptor
     {
         readonly IUserDataDescriptor inner = new StandardUserDataDescriptor(typeof(Vector3), InteropAccessMode.Default);

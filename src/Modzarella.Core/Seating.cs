@@ -68,12 +68,12 @@ namespace Modz
             madeKinematic.Clear();
             foreach (var p in r.GetRagdollParts())
             {
-                if (!p || !p.rigidBody || p.rigidBody.isKinematic) continue; // severed parts are already kinematic
+                if (!p || !p.rigidBody || p.rigidBody.isKinematic) continue;
                 p.rigidBody.velocity = Vector3.zero;
                 p.rigidBody.angularVelocity = Vector3.zero;
                 p.rigidBody.isKinematic = true;
                 interp[p.rigidBody] = p.rigidBody.interpolation;
-                p.rigidBody.interpolation = RigidbodyInterpolation.None; // interpolation would overwrite the pose with stale physics state
+                p.rigidBody.interpolation = RigidbodyInterpolation.None; // stale interpolation would undo the pose
                 madeKinematic.Add(p.rigidBody);
             }
             foreach (var h in new[] { r.handLeft, r.handRight }) if (h) h.BreakHold();

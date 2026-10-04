@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Modz
 {
-    // Colours come from theme.css, shared with the app and the website.
+    // colours from theme.css
     public static class Theme
     {
         static readonly Dictionary<string, string> vars = Load();
@@ -38,7 +38,7 @@ namespace Modz
 
         static Color Var(string name) => vars.TryGetValue(name, out var v) && ColorUtility.TryParseHtmlString(v, out var c) ? c : Color.magenta;
 
-        // the game renders in linear space; colours here are sRGB like the app and website
+        // the game is linear, theme colours are sRGB
         public static Color C(Color c) => QualitySettings.activeColorSpace == ColorSpace.Linear ? c.linear : c;
 
         public static Font Sans => sans ? sans : sans = Font.CreateDynamicFontFromOSFont(new[] { "Helvetica Neue", "Segoe UI", "Arial" }, 14);
@@ -129,7 +129,7 @@ namespace Modz
 
         static GUIStyle bar, barThumb, none;
 
-        // thin flat scrollbar: IMGUI finds the thumb and arrows by skin style name, so swap them in for one scroll view
+        // IMGUI finds scrollbar parts by skin style name, so swap them in
         public static Vector2 Scroll(Vector2 pos, Action draw)
         {
             var sk = GUI.skin;

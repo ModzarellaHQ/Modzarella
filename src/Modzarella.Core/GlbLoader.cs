@@ -13,11 +13,11 @@ namespace Modz
     {
         public class CarModel
         {
-            public GameObject Body;              // inactive template, child meshes at model space
-            public GameObject[] Wheels;          // 4 templates pivoted at wheel centre: FR, FL, RR, RL (or null)
-            public Vector3[] WheelCenters;       // in model space (after normalisation)
-            public float WheelRadius;            // 0 if no wheels found
-            public Bounds BodyBounds;            // model-space bounds of the whole car
+            public GameObject Body;              // inactive template
+            public GameObject[] Wheels;          // FR, FL, RR, RL pivoted at their centres, or null
+            public Vector3[] WheelCenters;
+            public float WheelRadius;
+            public Bounds BodyBounds;
             public int Triangles, DrawCalls;
         }
 
@@ -50,7 +50,7 @@ namespace Modz
 
             var g = new Gltf(json, bin, Path.GetDirectoryName(path));
 
-            var bodyPrims = new Dictionary<int, Prim>();             // material -> merged prim
+            var bodyPrims = new Dictionary<int, Prim>();
             var wheelPrims = new List<(Vector3 center, Dictionary<int, Prim> byMat)>();
             var scenes = g.List("scenes");
             int sceneIdx = json.ContainsKey("scene") ? g.Int(json["scene"]) : 0;
@@ -259,7 +259,7 @@ namespace Modz
             for (int i = 0; i < subs.Count; i++) mesh.SetTriangles(subs[i], i, false);
             if (needNormals) mesh.RecalculateNormals();
             mesh.RecalculateBounds();
-            mesh.UploadMeshData(false); // keep the CPU copy: crash dents deform it
+            mesh.UploadMeshData(false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             var mr = go.AddComponent<MeshRenderer>();
             mr.sharedMaterials = mats.ToArray();
@@ -521,7 +521,7 @@ namespace Modz
                 if (s[i] == '}') { i++; return d; }
                 while (true)
                 {
-                    Ws(s, ref i); string k = Str(s, ref i); Ws(s, ref i); i++; // ':'
+                    Ws(s, ref i); string k = Str(s, ref i); Ws(s, ref i); i++;
                     d[k] = Value(s, ref i); Ws(s, ref i);
                     if (s[i++] == '}') return d;
                 }
