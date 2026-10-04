@@ -21,6 +21,10 @@ namespace Modz
         public static bool HideArms, Flying;
         internal static Vector3 flyPos;
         internal static float flyYaw, flyPitch;
+        internal static Vector3 flyHeading;
+        static Vector3 savedPos;
+        static Quaternion savedRot;
+        static float savedYaw, savedPitch;
         internal Transform eye;
         private bool lockedCursor;
         private float lastMouseMove;
@@ -56,7 +60,7 @@ namespace Modz
         private void LateUpdate()
         {
             ShowOwnHead(null);
-            if (!FPActive || !StageManager.Instance) return;
+            if (!FPActive || Flying || !StageManager.Instance) return;
             var me = ModCommon.LocalRagdoll();
             var parts = HideArms ? new[] { me.head, me.spine2, me.upperArmLeft, me.lowerArmLeft, me.handLeft, me.upperArmRight, me.lowerArmRight, me.handRight } : new[] { me.head, me.spine2 };
             foreach (var part in parts)
@@ -92,15 +96,25 @@ namespace Modz
 
         void SetFlying(bool on)
         {
-            var cam = StageManager.Instance ? StageManager.Instance.cameraRig.mainCamera : null;
-            if (on && !cam) return;
+            var rig = StageManager.Instance ? StageManager.Instance.cameraRig : null;
+            if (!rig || !rig.mainCamera || on == Flying) return;
+            var t = rig.mainCamera.transform;
             Flying = on;
             if (on)
             {
-                flyPos = cam.transform.position;
-                var e = cam.transform.eulerAngles;
+                // the rig is frozen while flying and put back exactly as it was afterwards
+                savedPos = t.position; savedRot = t.rotation; savedYaw = rig.yaw; savedPitch = rig.pitch;
+                var me = ModCommon.LocalRagdoll();
+                flyHeading = me ? Body.Facing(me) : Vector3.forward;
+                flyPos = t.position;
+                var e = t.eulerAngles;
                 flyYaw = e.y;
                 flyPitch = e.x > 180f ? e.x - 360f : e.x;
+            }
+            else
+            {
+                t.SetPositionAndRotation(savedPos, savedRot);
+                rig.yaw = savedYaw; rig.pitch = savedPitch;
             }
             ModCommon.Toast(on ? $"Freecam · WASD fly · Shift fast · Space up · Ctrl down · {ModCommon.Key(FlyKey.Value)} to stop" : "Freecam off");
         }
@@ -186,8 +200,9 @@ namespace Modz
         private static Vector3 appliedShift;
 
         [HarmonyPrefix, HarmonyPatch(typeof(CameraRig), "LateUpdate")]
-        private static void Before(CameraRig __instance)
+        private static bool Before(CameraRig __instance)
         {
+            if (CameraFeature.Flying) return false;
             if (__instance.mainCamera) __instance.mainCamera.transform.position -= appliedShift;
             appliedShift = Vector3.zero;
             UpdateFirstPerson(__instance);
@@ -204,6 +219,7 @@ namespace Modz
                 if (C.FPActive) z = 0.0001f;
             }
             Offset(__instance) = b * z;
+            return true;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CameraRig), "LateUpdate")]

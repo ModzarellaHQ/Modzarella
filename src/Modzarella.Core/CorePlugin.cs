@@ -303,6 +303,6 @@ namespace Modz
         static bool KeepCursorForMenu() => !CorePlugin.MenuOpen;
 
         [HarmonyPrefix, HarmonyPatch(typeof(InputManager), "Look")]
-        static bool NoLookInMenu() => !CorePlugin.MenuOpen;
+        static bool NoLookInMenu() => !CorePlugin.MenuOpen && !CameraFeature.Flying;
     }
 }

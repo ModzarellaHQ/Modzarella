@@ -242,7 +242,8 @@ namespace Modz
         [HarmonyPrefix, HarmonyPatch(typeof(ActiveRagdoll), "SetRootTargetRotation")]
         static void Face(ActiveRagdoll __instance, ref Vector3 heading)
         {
-            if (Body.Heading(__instance, out var h) && h.sqrMagnitude > 1e-4f) heading = h.normalized;
+            if (CameraFeature.Flying && ModCommon.IsLocal(__instance)) heading = CameraFeature.flyHeading;
+            else if (Body.Heading(__instance, out var h) && h.sqrMagnitude > 1e-4f) heading = h.normalized;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(ActiveRagdoll), nameof(ActiveRagdoll.Input))]
