@@ -51,6 +51,29 @@ public record Game(string Dir, Platform Platform)
         }
     }
 
+    static Process[] Processes() => Process.GetProcessesByName("CheeseRolling");
+
+    public static bool Running() { var p = Processes(); foreach (var x in p) x.Dispose(); return p.Length > 0; }
+
+    // asks the game to quit, then forces it if it is still running a few seconds later
+    public static string Stop()
+    {
+        var procs = Processes();
+        if (procs.Length == 0) return "The game isn't running.";
+        foreach (var p in procs)
+        {
+            try
+            {
+                if (OperatingSystem.IsWindows()) p.CloseMainWindow();
+                else Process.Start("kill", ["-TERM", p.Id.ToString()])?.WaitForExit();
+                if (!p.WaitForExit(5000)) p.Kill();
+            }
+            catch (InvalidOperationException) { }
+            finally { p.Dispose(); }
+        }
+        return "Game stopped.";
+    }
+
     public string Launch()
     {
         if (Platform == Platform.Mac)

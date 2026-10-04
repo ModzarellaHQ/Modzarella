@@ -9,8 +9,11 @@ public static class Loader
 
     public static async Task<string> Install(Game game, HttpClient http)
     {
-        var asset = game.Platform == Platform.Mac ? $"BepInEx_macos_universal_{Version}.zip" : $"BepInEx_win_x64_{Version}.zip";
+        var (asset, sha) = game.Platform == Platform.Mac
+            ? ($"BepInEx_macos_universal_{Version}.zip", "01c2ae782eb016dfd6c345a18dbd2dcafffb3d9d318449d6486689f426b4a323")
+            : ($"BepInEx_win_x64_{Version}.zip", "82f9878551030f54657792c0740d9d51a09500eeae1fba21106b0c441e6732c4");
         var zip = await http.GetByteArrayAsync(Releases + asset);
+        if (Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(zip)) != sha) throw new Exception("The BepInEx download didn't match its checksum.");
         using (var archive = new ZipArchive(new MemoryStream(zip)))
             archive.ExtractToDirectory(game.Dir, overwriteFiles: true);
 

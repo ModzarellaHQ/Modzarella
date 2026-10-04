@@ -13,7 +13,9 @@ public class Settings
 
     public static Settings Load()
     {
-        var s = File.Exists(FilePath) ? JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath)) ?? new() : new();
+        Settings s;
+        try { s = File.Exists(FilePath) ? JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath)) ?? new() : new(); }
+        catch (Exception) { s = new(); }
         if (s.Source is "https://modzarellahq.github.io/Modz/" or "https://modza.space/Modz/") s.Source = DefaultSource;
         return s;
     }
