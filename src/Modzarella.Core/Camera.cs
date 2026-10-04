@@ -38,7 +38,7 @@ namespace Modz
             MouseSens = Config.Bind("Camera", "Mouse sensitivity", 0.15f, ModCommon.Desc("Degrees per pixel of mouse movement.", new AcceptableValueRange<float>(0.02f, 1f)));
             Zoom = Config.Bind("Camera", "Zoom", 1f, ModCommon.Desc("Camera distance multiplier.", new AcceptableValueRange<float>(0.4f, 4f)));
             InvertY = Config.Bind("Camera", "Invert mouse Y", false, ModCommon.Desc("Invert vertical mouse look.", advanced: true));
-            AutoCenter = Config.Bind("Camera", "Recentre behind vehicle", true, ModCommon.Desc("While driving, swing back behind the car when the mouse is idle.", advanced: true));
+            AutoCenter = Config.Bind("Camera", "Recentre behind vehicle", true, ModCommon.Desc("While driving, swing back behind the vehicle when the mouse is idle.", advanced: true));
             ScrollZoom = Config.Bind("Camera", "Scroll wheel zoom", true, ModCommon.Desc("Mouse wheel zooms.", advanced: true));
             SpeedFov = Config.Bind("Camera", "Speed FOV boost", 14f, ModCommon.Desc("Extra field of view at high speed.", new AcceptableValueRange<float>(0f, 40f), true));
             FlySpeed = Config.Bind("Camera", "Freecam speed", 12f, ModCommon.Desc("Metres per second. Hold Shift for four times faster.", new AcceptableValueRange<float>(1f, 60f)));

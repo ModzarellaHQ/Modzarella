@@ -33,7 +33,7 @@ namespace Modz
         public static bool InputAllowed => Application.isFocused && !CorePlugin.MenuOpen && !ModCommon.Paused && !CameraFeature.Flying;
 
         static readonly Dictionary<string, Type> types = new Dictionary<string, Type>();
-        static readonly Dictionary<string, GlbLoader.CarModel> models = new Dictionary<string, GlbLoader.CarModel>();
+        static readonly Dictionary<string, GlbLoader.Model> models = new Dictionary<string, GlbLoader.Model>();
         static readonly Dictionary<string, AudioClip> clips = new Dictionary<string, AudioClip>();
 
         static readonly Type[] statics =
@@ -234,7 +234,7 @@ namespace Modz
             {
                 var seat = a[0].ToObject<GameObject>().AddComponent<KinematicSeat>();
                 seat.Seat = a[1].ToObject<Transform>();
-                seat.Pose = a[2].String == "drive" ? SeatPose.Drive : SeatPose.Toilet;
+                seat.Pose = a[2].String == "reclined" ? SeatPose.Reclined : SeatPose.Upright;
                 seat.HandTarget = Arg<Transform>(a, 3);
                 return seat;
             });

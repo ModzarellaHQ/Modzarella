@@ -100,7 +100,7 @@ A ragdoll `r` has parts: `r.head`, `r.spine1` (pelvis), `r.spine2` (chest), `r.u
 | `body.set_hands_busy(r, true)` | Tell other mods the hands are taken |
 | `body.gib(r, part, parts)` | Copy a limb into a loose physics object |
 | `body.below(part)`, `body.parent(part)`, `body.name(r, part)` | Limb tree helpers |
-| `body.seat(object, seat_transform, "drive" or "toilet", hand_target)` | A seat; `:Sit(r, velocity)`, `:Stand(velocity)` |
+| `body.seat(object, seat_transform, "upright" or "reclined", hand_target)` | A seat; hands reach `hand_target` if given. `:Sit(r, velocity)`, `:Stand(velocity)` |
 | `body.ignore(r, colliders, true)` | Stop a ragdoll colliding with your object |
 
 `hold` (seconds) keeps a muscle pulling without calling it every step. Use it for anything that runs on many ragdolls.

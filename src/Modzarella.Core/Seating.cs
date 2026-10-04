@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Modz
 {
-    public enum SeatPose { Drive, Toilet }
+    public enum SeatPose { Upright, Reclined }
 
     public static class SeatUtil
     {
@@ -150,18 +150,18 @@ namespace Modz
             if (!r || !r.spine1 || !Seat) { Rider = null; return; }
             Vector3 F = Seat.forward, U = Seat.up, Rt = Seat.right;
             float sc = ModCommon.BodyScale(r);
-            bool drive = Pose == SeatPose.Drive;
+            bool reclined = Pose == SeatPose.Reclined;
 
             r.spine1.transform.SetPositionAndRotation(Seat.position, Seat.rotation * pelvisInSeat);
             if (r.spine1.rigidBody) { r.spine1.rigidBody.position = Seat.position; r.spine1.rigidBody.rotation = r.spine1.transform.rotation; }
             FK(r.spine1, r.spine2);
-            Aim(r.spine2, r.head, drive ? (U * 0.95f - F * 0.3f) : (U * 0.9f + F * 0.42f));
+            Aim(r.spine2, r.head, reclined ? (U * 0.95f - F * 0.3f) : (U * 0.9f + F * 0.42f));
 
             FK(r.spine1, r.upperLegLeft);
             FK(r.spine1, r.upperLegRight);
-            Vector3 thigh = drive ? (F * 0.97f - U * 0.1f) : (F * 0.98f + U * 0.02f);
-            Vector3 shin = drive ? (-U * 0.55f + F * 0.83f) : (-U * 0.96f + F * 0.25f);
-            float spread = drive ? 0.12f : 0.22f;
+            Vector3 thigh = reclined ? (F * 0.97f - U * 0.1f) : (F * 0.98f + U * 0.02f);
+            Vector3 shin = reclined ? (-U * 0.55f + F * 0.83f) : (-U * 0.96f + F * 0.25f);
+            float spread = reclined ? 0.12f : 0.22f;
             Aim(r.upperLegLeft, r.lowerLegLeft, thigh - Rt * spread);
             Aim(r.upperLegRight, r.lowerLegRight, thigh + Rt * spread);
             Aim(r.lowerLegLeft, r.footLeft, shin);
@@ -170,7 +170,7 @@ namespace Modz
             FK(r.spine2, r.upperArmLeft);
             FK(r.spine2, r.upperArmRight);
             Vector3 handL, handR;
-            if (drive && HandTarget)
+            if (HandTarget)
             {
                 handL = HandTarget.position - Rt * sc * 0.14f;
                 handR = HandTarget.position + Rt * sc * 0.14f;

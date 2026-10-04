@@ -11,7 +11,7 @@ namespace Modz
 {
     public static class GlbLoader
     {
-        public class CarModel
+        public class Model
         {
             public GameObject Body;              // inactive template
             public GameObject[] Wheels;          // FR, FL, RR, RL pivoted at their centres, or null
@@ -31,7 +31,7 @@ namespace Modz
 
         private static readonly string[] WheelWords = { "wheel", "tire", "tyre", "rim", "rad", "reifen", "felge", "roda", "rueda" };
 
-        public static CarModel Load(string path, float targetLength, float yawDegrees, Transform holder)
+        public static Model Load(string path, float targetLength, float yawDegrees, Transform holder)
         {
             byte[] file = File.ReadAllBytes(path);
             if (BitConverter.ToUInt32(file, 0) != 0x46546C67) throw new Exception("not a .glb (binary glTF) file");
@@ -77,7 +77,7 @@ namespace Modz
             ApplyAll(all, v => (v + offset) * scale, n => n, false);
             b = BoundsOf(all);
 
-            var model = new CarModel { BodyBounds = b };
+            var model = new Model { BodyBounds = b };
 
             if (wheelRaw.Count > 0)
             {
