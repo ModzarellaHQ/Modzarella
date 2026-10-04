@@ -4,7 +4,7 @@ namespace Modzarella;
 
 public class Settings
 {
-    public const string DefaultSource = "https://modza.space/mods/";
+    public const string DefaultSource = "https://modza.space/Modz/";
     public string Source { get; set; } = DefaultSource;
     public string? GameDir { get; set; }
 

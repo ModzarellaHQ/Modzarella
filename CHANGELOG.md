@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Mods are downloaded from modza.space/mods; existing installs switch over automatically
+- Mods are downloaded from modza.space/Modz; existing installs switch over automatically
 
 ## 1.1.0
 
