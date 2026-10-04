@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - run: sh package.sh ${{ matrix.rid }}
+      - run: sh scripts/package.sh ${{ matrix.rid }}
         shell: bash
       - uses: actions/upload-artifact@v4
         with:

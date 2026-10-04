@@ -1,0 +1,10 @@
+name: Feature request
+description: An idea for Modzarella
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: Idea
+      description: What would you like Modzarella to do, and why?
+    validations:
+      required: true

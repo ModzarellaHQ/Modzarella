@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 rid=$1
-cd "$(dirname "$0")"
-version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/Modzarella.csproj)
-dotnet publish src -c Release -r "$rid" --self-contained -o "build/$rid" \
+cd "$(dirname "$0")/.."
+version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/Modzarella/Modzarella.csproj)
+dotnet publish src/Modzarella -c Release -r "$rid" --self-contained -o "build/$rid" \
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none
 mkdir -p dist
 case $rid in
@@ -11,7 +11,7 @@ case $rid in
     app="build/$rid-app/Modzarella.app"
     rm -rf "$app" && mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
     cp "build/$rid/Modzarella" "$app/Contents/MacOS/"
-    cp assets/icon.icns "$app/Contents/Resources/"
+    cp assets/branding/icon.icns "$app/Contents/Resources/"
     cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

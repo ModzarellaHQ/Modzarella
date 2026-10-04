@@ -92,17 +92,16 @@ async function load() {
   $('mods').innerHTML = s.mods.map(({mod, state}) => {
     const on = state === 'Enabled' || state === 'UpdateAvailable';
     const installed = state !== 'NotInstalled';
-    const core = mod.id === 'core';
     return `
     <div class="mod">
       <div class="grow">
         <h3>${esc(mod.name)} <span class="dim small">v${esc(mod.version)}</span></h3>
-        <div class="dim small">${esc(mod.author)}${core ? ' · required by every mod' : ''}${state === 'UpdateAvailable' ? ' · <span class="update">update available</span>' : ''}</div>
+        <div class="dim small">${esc(mod.author)}${state === 'UpdateAvailable' ? ' · <span class="update">update available</span>' : ''}</div>
         <p>${esc(mod.description)}</p>
         ${mod.credits?.length ? `<details><summary>Credits</summary>${mod.credits.map(esc).join('<br>')}</details>` : ''}
-        ${installed && !core ? `<div style="margin-top:6px"><button class="link" onclick="act('remove','${esc(mod.id)}')">Uninstall</button></div>` : ''}
+        ${installed ? `<div style="margin-top:6px"><button class="link" onclick="act('remove','${esc(mod.id)}')">Uninstall</button></div>` : ''}
       </div>
-      <label class="switch" title="${on ? 'On' : 'Off'}"><input type="checkbox" ${on ? 'checked' : ''} ${core && installed ? 'disabled' : ''}
+      <label class="switch" title="${on ? 'On' : 'Off'}"><input type="checkbox" ${on ? 'checked' : ''}
         onchange="act(this.checked ? '${installed ? 'enable' : 'install'}' : 'disable', '${esc(mod.id)}')"><span></span></label>
     </div>`;
   }).join('');

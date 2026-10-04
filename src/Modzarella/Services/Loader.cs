@@ -16,6 +16,7 @@ public static class Loader
 
         Directory.CreateDirectory(Path.Combine(game.Dir, "BepInEx", "config"));
         if (game.Platform == Platform.Mac) PatchMac(game.Dir);
+        CoreRuntime.Ensure(game);
         return $"BepInEx {Version} installed.";
     }
 

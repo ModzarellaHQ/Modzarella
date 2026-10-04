@@ -1,0 +1,25 @@
+name: Bug report
+description: Something doesn't work
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: What did you do, and what did you expect instead?
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: System
+      options: [macOS (Apple Silicon), macOS (Intel), Windows, Linux]
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Modzarella version
+      placeholder: "1.0.0"
+  - type: textarea
+    attributes:
+      label: Log
+      description: Attach or paste `BepInEx/LogOutput.log` from the game folder if the problem is in game.
+      render: text

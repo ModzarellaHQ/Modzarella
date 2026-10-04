@@ -1,118 +1,63 @@
-<p align="center"><img src="assets/icon.png" width="112" alt=""></p>
-
-<h1 align="center">Modzarella</h1>
-
 <p align="center">
-  A mod manager for <a href="https://store.steampowered.com/app/3809440/">Cheese Rolling</a>. Works on macOS, Windows and Linux.<br>
-  <a href="https://modzarella.dev">modzarella.dev</a>
+  <img src="assets/branding/banner.png" alt="Modzarella" width="100%">
 </p>
 
----
+<p align="center">
+  <a href="https://github.com/ModzarellaHQ/Modzarella/releases/latest"><b>Download</b></a> ·
+  <a href="#install">Install</a> ·
+  <a href="docs/troubleshooting.md">Help</a> ·
+  <a href="https://github.com/ModzarellaHQ/Modz">Make mods</a> ·
+  <a href="https://modzarella.dev">Website</a>
+</p>
 
-## Download
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-black?style=flat-square&logo=apple" alt="macOS">
+  <img src="https://img.shields.io/badge/Windows-0078D4?style=flat-square&logo=windows" alt="Windows">
+  <img src="https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black" alt="Linux">
+  <img src="https://img.shields.io/badge/license-MIT-f5b830?style=flat-square" alt="MIT">
+</p>
 
-Grab the latest build from [**Releases**](https://github.com/ModzarellaHQ/Modzarella/releases/latest).
+Modzarella is a mod manager for [Cheese Rolling](https://store.steampowered.com/app/3809440/). Pick your mods, press Play, and you're in.
 
-| System | File |
-|---|---|
-| Mac (Apple Silicon) | `Modzarella-mac-apple-silicon.zip` |
-| Mac (Intel) | `Modzarella-mac-intel.zip` |
-| Windows 10 / 11 | `Modzarella-windows.exe` |
-| Linux | `Modzarella-linux.tar.gz` |
+## Features
 
-Not sure which Mac you have? Open  → **About This Mac**. "Apple M…" means Apple Silicon.
-
-You'll need Cheese Rolling installed through Steam and launched at least once.
+- **One-click setup:** finds the game and installs the mod loader for you
+- **Mod browser:** turn mods on and off, update or uninstall them with one click
+- **In-game menu:** press **F1** to tweak every mod's settings and keys while playing
+- **Built-in extras:** free mouse camera, first person and zoom, no mod needed
+- **Safe installs:** every download is checked before it touches your game
+- **Cross-platform:** native app for macOS, Windows and Linux
 
 ## Install
 
-**macOS:** unzip it and drag **Modzarella.app** into Applications.
-If macOS refuses to open it, go to **System Settings → Privacy & Security** and click **Open Anyway**. You only do this once.
+Download the file for your system from the [latest release](https://github.com/ModzarellaHQ/Modzarella/releases/latest).
 
-**Windows:** run the `.exe`.
-If SmartScreen appears, click **More info → Run anyway**.
+| System | Download | First launch |
+|---|---|---|
+| **macOS** (Apple Silicon) | `Modzarella-mac-apple-silicon.zip` | Unzip, move to Applications. If it's blocked: **System Settings → Privacy & Security → Open Anyway** |
+| **macOS** (Intel) | `Modzarella-mac-intel.zip` | Same as above |
+| **Windows** 10 / 11 | `Modzarella-windows.exe` | If SmartScreen appears: **More info → Run anyway** |
+| **Linux** | `Modzarella-linux.tar.gz` | Extract and run `./Modzarella`. See [Linux setup](docs/troubleshooting.md#linux) |
 
-**Linux:** extract the archive and run `./Modzarella`. It needs WebKitGTK 4.1 (for example `libwebkit2gtk-4.1-0` on Ubuntu). The game runs through Proton, so add this once under **Properties → Launch Options** in Steam:
-
-```
-WINEDLLOVERRIDES="winhttp=n,b" %command%
-```
+You need Cheese Rolling from Steam, launched at least once.
 
 ## Usage
 
-1. Open Modzarella. It finds the game on its own.
-2. Switch on the mods you want.
-3. Hit **Play**. The first launch also installs the mod loader, [BepInEx](https://github.com/BepInEx/BepInEx).
-4. In game, pick **Play Offline** and press **F1** for the mod menu.
+1. Open Modzarella and switch on the mods you want.
+2. Press **Play**.
+3. In game, choose **Play Offline** and press **F1** for the mod menu.
 
-| To… | Do this |
-|---|---|
-| Turn a mod off | Flip its switch |
-| Remove a mod | Click **Uninstall** under it |
-| Update | Click **Update all** (it only shows when there's an update) |
-| Go back to the unmodded game | **Settings → Remove all mods** |
+Mods only run offline. To play without them, start the game from Steam as usual.
 
-On Mac, Steam needs to be running. Modzarella opens it if it isn't; press **Play** again once it's loaded.
+## Help
 
-## Troubleshooting
+Something not working? See [Troubleshooting](docs/troubleshooting.md), or [open an issue](https://github.com/ModzarellaHQ/Modzarella/issues/new/choose).
 
-<details>
-<summary><b>"Cheese Rolling wasn't found"</b></summary>
-<br>
+## Contributing
 
-Set the folder in **Settings → Game folder**. In Steam you can find it with **right-click the game → Manage → Browse local files**.
-</details>
-
-<details>
-<summary><b>The game opens without mods</b></summary>
-<br>
-
-- Launch from Modzarella, not Steam. On Windows, launching from Steam works too.
-- Pick **Play Offline**. Mods don't run online.
-- Try **Settings → Repair mod loader**.
-- On Linux, double-check the launch option above.
-</details>
-
-<details>
-<summary><b>Something broke after an update</b></summary>
-<br>
-
-Turn mods off one by one to find the culprit. Still stuck? [Open an issue](https://github.com/ModzarellaHQ/Modzarella/issues) and attach `BepInEx/LogOutput.log` from the game folder.
-</details>
-
-## FAQ
-
-**Can I get banned?** Mods only run in Play Offline and never touch online matches.
-
-**Is it safe?** Mods come from [Modz](https://github.com/ModzarellaHQ/Modz), and every file is checked against its checksum before it's installed.
-
-**How do I uninstall it?** Use **Settings → Remove all mods**, then delete the app. Its settings live in `~/Library/Application Support/Modzarella`, `%APPDATA%\Modzarella` or `~/.config/Modzarella`.
-
-## Development
-
-You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
-
-```sh
-dotnet run --project src        # run from source
-./package.sh osx-arm64          # or osx-x64, win-x64, linux-x64; output goes to dist/
-```
-
-Pushing a `v*` tag builds every platform and publishes a release.
-
-<details>
-<summary><b>Command line</b></summary>
-<br>
-
-```
-Modzarella status | list | update | launch
-Modzarella install [ids] | remove <ids> | enable <ids> | disable <ids>
-Modzarella loader | unloader
-Modzarella source [url|folder] | game [folder]
-```
-
-On macOS the binary is `Modzarella.app/Contents/MacOS/Modzarella`. Mods install to `<game>/BepInEx/plugins/Modz/<id>/`.
-</details>
+- **Mods** live in [Modz](https://github.com/ModzarellaHQ/Modz). That's the place to make or share one.
+- **The app:** see [CONTRIBUTING.md](CONTRIBUTING.md) and [Building](docs/building.md).
 
 ## License
 
-MIT
+[MIT](LICENSE). Modzarella is a community project and isn't affiliated with the developers of Cheese Rolling.

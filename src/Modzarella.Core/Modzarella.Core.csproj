@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>Modzarella.Core</AssemblyName>
+    <RootNamespace>Modz</RootNamespace>
+    <DebugType>embedded</DebugType>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>../Modzarella/Runtime/</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GameDir)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">
+    <GameDir>$(HOME)/Library/Application Support/Steam/steamapps/common/Cheese Rolling</GameDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GameDir)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">
+    <GameDir>C:\Program Files (x86)\Steam\steamapps\common\Cheese Rolling</GameDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GameDir)' == '' And $([MSBuild]::IsOSPlatform('Linux'))">
+    <GameDir>$(HOME)/.local/share/Steam/steamapps/common/Cheese Rolling</GameDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManagedDir Condition="Exists('$(GameDir)/CheeseRolling.app')">$(GameDir)/CheeseRolling.app/Contents/Resources/Data/Managed</ManagedDir>
+    <ManagedDir Condition="'$(ManagedDir)' == ''">$(GameDir)/CheeseRolling_Data/Managed</ManagedDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="$(GameDir)/BepInEx/core/BepInEx.dll" Private="false" />
+    <Reference Include="$(GameDir)/BepInEx/core/0Harmony.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/Assembly-CSharp.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/com.rlabrecque.steamworks.net.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/Unity.InputSystem.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.PhysicsModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.AudioModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.IMGUIModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.TextRenderingModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.InputLegacyModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.ImageConversionModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.AnimationModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.ParticleSystemModule.dll" Private="false" />
+  </ItemGroup>
+</Project>

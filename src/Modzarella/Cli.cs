@@ -42,6 +42,7 @@ static class Cli
                     break;
                 case "install":
                     if (!game.LoaderInstalled) Console.WriteLine(await Loader.Install(game, http));
+                    if (CoreRuntime.Ensure(game) is { } core) Console.WriteLine(core);
                     var all = await catalog.Mods();
                     foreach (var id in rest.Length > 0 ? rest : all.Select(m => m.Id).ToArray())
                         foreach (var line in await catalog.Install(game, id, all)) Console.WriteLine(line);
@@ -57,6 +58,7 @@ static class Cli
                     foreach (var line in await catalog.UpdateAll(game)) Console.WriteLine(line);
                     break;
                 case "launch":
+                    if (CoreRuntime.Ensure(game) is { } c) Console.WriteLine(c);
                     Console.WriteLine(game.Launch());
                     break;
                 default:

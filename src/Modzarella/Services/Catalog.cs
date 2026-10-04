@@ -45,7 +45,7 @@ public class Catalog(string source, HttpClient http)
         var log = new List<string>();
         if (!done.Add(id)) return log;
         var mod = all.FirstOrDefault(m => m.Id == id) ?? throw new Exception($"No mod '{id}' in the catalog.");
-        foreach (var dep in mod.Dependencies) log.AddRange(await Install(game, dep, all, done));
+        foreach (var dep in mod.Dependencies.Where(d => d != CoreRuntime.Id)) log.AddRange(await Install(game, dep, all, done));
         if (StateOf(game, mod) is State.Enabled or State.Disabled) return log;
 
         var dir = System.IO.Path.Combine(game.Plugins, mod.Id);

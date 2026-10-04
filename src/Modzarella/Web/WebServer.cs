@@ -88,6 +88,7 @@ public static class Web
             case "install":
                 var log = new List<string>();
                 if (!game.LoaderInstalled) log.Add(await Loader.Install(game, http));
+                CoreRuntime.Ensure(game);
                 log.AddRange(await catalog.Install(game, r.Id!));
                 return log;
             case "remove": return [Catalog.Remove(game, r.Id!)];
@@ -97,7 +98,7 @@ public static class Web
             case "launch":
                 var steps = new List<string>();
                 if (!game.LoaderInstalled) steps.Add(await Loader.Install(game, http));
-                if (Catalog.Installed(game, "core") == null) steps.AddRange(await catalog.Install(game, "core"));
+                if (CoreRuntime.Ensure(game) is { } core) steps.Add(core);
                 steps.Add(game.Launch());
                 return steps;
             default: throw new Exception("Unknown action " + r.Action);
