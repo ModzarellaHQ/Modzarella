@@ -41,7 +41,7 @@ namespace Modz
             typeof(Vector2), typeof(Vector3), typeof(Quaternion), typeof(Color), typeof(Mathf), typeof(Time), typeof(Physics),
             typeof(GameObject), typeof(PrimitiveType), typeof(ForceMode), typeof(LightType), typeof(LightShadows),
             typeof(RigidbodyInterpolation), typeof(CollisionDetectionMode), typeof(PhysicMaterialCombine), typeof(AudioRolloffMode),
-            typeof(Space), typeof(LayerMask), typeof(Keyboard), typeof(Mouse), typeof(Gamepad), typeof(GameManager), typeof(StageManager),
+            typeof(Space), typeof(LayerMask), typeof(Ray), typeof(Keyboard), typeof(Mouse), typeof(Gamepad), typeof(GameManager), typeof(StageManager),
         };
 
         static Table List(Script s, System.Collections.IEnumerable items)
@@ -118,9 +118,10 @@ namespace Modz
             });
             g["destroy"] = Fn(s, a => { if (a[0].ToObject() is UnityEngine.Object o && o) UnityEngine.Object.Destroy(o, Arg(a, 1, 0f)); return null; });
             g["destroy_now"] = Fn(s, a => { if (a[0].ToObject() is UnityEngine.Object o && o) UnityEngine.Object.DestroyImmediate(o); return null; });
-            g["add"] = Fn(s, a => a[0].ToObject<GameObject>().AddComponent(FindType(a[1].String)));
-            g["get"] = Fn(s, a => { var c = a[0].ToObject<Component>(); var t = FindType(a[1].String); var go = a[0].ToObject() as GameObject; return go ? go.GetComponent(t) : c ? c.GetComponent(t) : null; });
+            g["get"] = Fn(s, a => Target(a[0]).GetComponent(FindType(a[1].String)));
+            g["add"] = Fn(s, a => Target(a[0]).AddComponent(FindType(a[1].String)));
             g["find"] = (Func<string, GameObject>)GameObject.Find;
+            g["list"] = Fn(s, a => List(s, (System.Collections.IEnumerable)a[0].ToObject()));
             g["components"] = Fn(s, a => List(s, Target(a[0]).GetComponents(FindType(a[1].String))));
             g["children"] = Fn(s, a => List(s, Target(a[0]).GetComponentsInChildren(FindType(a[1].String), Arg(a, 2, false))));
 
