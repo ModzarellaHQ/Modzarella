@@ -25,7 +25,8 @@ public static class Web
 
     static async Task Loop(HttpListener listener, Settings settings, HttpClient http, Action quit)
     {
-        var html = new StreamReader(typeof(Web).Assembly.GetManifestResourceStream("ui.html")!).ReadToEnd();
+        var html = new StreamReader(typeof(Web).Assembly.GetManifestResourceStream("ui.html")!).ReadToEnd()
+            .Replace("/* theme.css */", new StreamReader(typeof(Web).Assembly.GetManifestResourceStream("theme.css")!).ReadToEnd());
         while (true)
         {
             var ctx = await listener.GetContextAsync();
