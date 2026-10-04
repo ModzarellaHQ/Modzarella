@@ -37,7 +37,6 @@ namespace Modz
         {
             public string Name, Version, Description, Error;
             public ConfigFile Config;
-            public ConfigEntry<bool> Enabled;
             public List<KeyValuePair<string, Action>> Buttons = new List<KeyValuePair<string, Action>>();
             public LuaMod Lua;
         }
@@ -91,7 +90,7 @@ namespace Modz
             var pages = new List<Page> { new Page { Name = "Modzarella", Version = Info.Metadata.Version.ToString(), Description = "Camera, game tweaks and performance. Built into Modzarella.", Config = Config } };
             foreach (var m in LuaEngine.Mods)
             {
-                var p = new Page { Name = m.Name, Version = m.Version, Description = m.Description, Error = m.Error, Config = m.Config, Enabled = m.Enabled, Lua = m };
+                var p = new Page { Name = m.Name, Version = m.Version, Description = m.Description, Error = m.Error, Config = m.Config, Lua = m };
                 foreach (var b in m.Buttons) { var fn = b.Value; p.Buttons.Add(new KeyValuePair<string, Action>(b.Key, () => LuaEngine.Invoke(m, fn))); }
                 pages.Add(p);
             }
@@ -182,8 +181,7 @@ namespace Modz
 
             var head = GUILayoutUtility.GetRect(1, 30, GUILayout.ExpandWidth(true));
             Theme.Rect(head, new Color(Theme.Surface.r, Theme.Surface.g, Theme.Surface.b, 0.9f));
-            if (p.Enabled != null) p.Enabled.Value = GUI.Toggle(new Rect(head.x + 12, head.y + 7, 16, 16), p.Enabled.Value, GUIContent.none, Theme.Toggle);
-            float x = head.x + (p.Enabled != null ? 36 : 12);
+            float x = head.x + 12;
             var nameStyle = Theme.TextStyle(13, p.Error != null ? Theme.Bad : Theme.TextColor, "left", true);
             float nw = nameStyle.CalcSize(new GUIContent(p.Name)).x;
             GUI.Label(new Rect(x, head.y, nw, 30), p.Name, nameStyle);
@@ -204,7 +202,7 @@ namespace Modz
             if (p.Buttons.Count > 0)
             {
                 GUILayout.Space(4);
-                GUI.enabled = ModCommon.InRound && (p.Enabled == null || p.Enabled.Value) && p.Error == null;
+                GUI.enabled = ModCommon.InRound && p.Error == null;
                 GUILayout.BeginHorizontal();
                 foreach (var b in p.Buttons)
                     if (GUILayout.Button(b.Key, Theme.Button)) { try { b.Value(); } catch (Exception e) { Log.LogError(e); } }

@@ -16,13 +16,12 @@ namespace Modz
         internal float errorWindow;
         internal int errorCount;
         public ConfigFile Config;
-        public ConfigEntry<bool> Enabled;
         public Script Script;
         public readonly List<KeyValuePair<string, DynValue>> Buttons = new List<KeyValuePair<string, DynValue>>();
         internal readonly List<(float at, DynValue fn)> Timers = new List<(float, DynValue)>();
 
         public DynValue Fn(string name) => Script?.Globals.Get(name) ?? DynValue.Nil;
-        public bool Running => Script != null && Error == null && Enabled.Value;
+        public bool Running => Script != null && Error == null;
     }
 
     public class LuaEngine : MonoBehaviour
@@ -58,8 +57,6 @@ namespace Modz
                 mod.Description = m.TryGetValue("description", out var d) ? d.ToString() : "";
             }
             mod.Config = new ConfigFile(Path.Combine(Paths.ConfigPath, $"modz.{mod.Id}.cfg"), true);
-            mod.Enabled = mod.Config.Bind("General", "Enabled", true, mod.Description);
-            mod.Enabled.SettingChanged += (_, __) => { if (!mod.Enabled.Value) Call(mod, "on_disable"); };
             Mods.Add(mod);
             Run(mod);
         }
