@@ -41,5 +41,6 @@
     <Reference Include="$(ManagedDir)/UnityEngine.ImageConversionModule.dll" Private="false" />
     <Reference Include="$(ManagedDir)/UnityEngine.AnimationModule.dll" Private="false" />
     <Reference Include="$(ManagedDir)/UnityEngine.ParticleSystemModule.dll" Private="false" />
+    <Reference Include="lib/MoonSharp.Interpreter.dll" Private="true" />
   </ItemGroup>
 </Project>
