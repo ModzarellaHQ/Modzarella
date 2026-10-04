@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -14,61 +14,69 @@ namespace Modz
     public class CorePlugin : BaseUnityPlugin
     {
         public const string GUID = "modz.core";
-        public const string Prefix = "modz.";
         public static CorePlugin Instance;
         internal static ManualLogSource Log;
 
         public ConfigEntry<KeyboardShortcut> MenuKey;
 
-        private bool menuOpen;
-        private Rect window;
-        private Vector2 scroll;
-        private int page;
-        private bool showAdvanced;
-        private string search = "";
-        private ConfigEntryBase rebinding;
-        private readonly Dictionary<ConfigEntryBase, string> numText = new Dictionary<ConfigEntryBase, string>();
-        private CursorLockMode prevLock;
-        private bool prevVisible;
-        private string toast;
-        private float toastUntil;
-        private GUIStyle h, dim, section, tabOn;
+        bool menuOpen, showMore;
+        Rect window;
+        Vector2 scroll, sideScroll;
+        int page;
+        ConfigEntryBase rebinding;
+        readonly Dictionary<ConfigEntryBase, string> numText = new Dictionary<ConfigEntryBase, string>();
+        CursorLockMode prevLock;
+        bool prevVisible;
+        string toast;
+        float toastUntil;
 
         public static bool MenuOpen => Instance && Instance.menuOpen;
 
-        private void Awake()
+        class Page
+        {
+            public string Name, Version, Description, Error;
+            public ConfigFile Config;
+            public ConfigEntry<bool> Enabled;
+            public List<KeyValuePair<string, Action>> Buttons = new List<KeyValuePair<string, Action>>();
+            public LuaMod Lua;
+        }
+
+        void Awake()
         {
             Instance = this;
             Log = Logger;
-            MenuKey = Config.Bind("Keys", "Mod menu", new KeyboardShortcut(KeyCode.F1), "Open or close the mod menu.");
+            MenuKey = Config.Bind("Keys", "Mod menu", new KeyboardShortcut(KeyCode.F1), "Open or close this menu.");
             new Harmony(GUID).PatchAll(typeof(CorePatches));
+            new Harmony(GUID + ".body").PatchAll(typeof(BodyPatches));
             gameObject.AddComponent<CameraFeature>().Init(Config);
+            gameObject.AddComponent<TweaksFeature>().Init(Config);
+            gameObject.AddComponent<LuaEngine>().Init();
         }
 
         public static void Toast(string msg)
         {
-            if (!Instance) { Debug.Log("[Modz] " + msg); return; }
+            if (!Instance) { Debug.Log("[Modzarella] " + msg); return; }
             Instance.toast = msg;
             Instance.toastUntil = Time.unscaledTime + 3f;
             Log.LogInfo(msg);
         }
 
-        private void Update()
+        void Update()
         {
             if (rebinding == null && ModCommon.KeyDown(MenuKey.Value)) SetMenu(!menuOpen);
             KeepCursor();
         }
 
-        private void LateUpdate() => KeepCursor();
+        void LateUpdate() => KeepCursor();
 
-        private void KeepCursor()
+        void KeepCursor()
         {
             if (!menuOpen) return;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
 
-        private void SetMenu(bool open)
+        void SetMenu(bool open)
         {
             if (open == menuOpen) return;
             menuOpen = open;
@@ -77,42 +85,31 @@ namespace Modz
             else { Cursor.lockState = prevLock; Cursor.visible = prevVisible; }
         }
 
-        private static IEnumerable<PluginInfo> Mods() =>
-            Chainloader.PluginInfos.Values
-                .Where(p => p.Metadata.GUID.StartsWith(Prefix) && p.Instance)
-                .OrderBy(p => p.Metadata.GUID == GUID ? 0 : 1).ThenBy(p => p.Metadata.Name);
-
-        private static ConfigEntry<bool> MasterSwitch(PluginInfo p)
+        List<Page> Pages()
         {
-            foreach (var kv in p.Instance.Config)
-                if (kv.Key.Section == "General" && kv.Key.Key == "Enabled" && kv.Value is ConfigEntry<bool> b) return b;
-            return null;
+            var pages = new List<Page> { new Page { Name = "Modzarella", Version = Info.Metadata.Version.ToString(), Description = "Camera, game tweaks and performance. Built into Modzarella.", Config = Config } };
+            foreach (var m in LuaEngine.Mods)
+            {
+                var p = new Page { Name = m.Name, Version = m.Version, Description = m.Description, Error = m.Error, Config = m.Config, Enabled = m.Enabled, Lua = m };
+                foreach (var b in m.Buttons) { var fn = b.Value; p.Buttons.Add(new KeyValuePair<string, Action>(b.Key, () => LuaEngine.Invoke(m, fn))); }
+                pages.Add(p);
+            }
+            return pages;
         }
 
-        private static string Blurb(PluginInfo p) => MasterSwitch(p)?.Description.Description ?? "Built in: mod menu, mouse camera, first person, zoom.";
-        private static bool IsAdvanced(ConfigEntryBase e) => e.Description.Tags != null && e.Description.Tags.Contains("Advanced");
-
-        private void OnGUI()
+        void OnGUI()
         {
-            if (toast != null && Time.unscaledTime < toastUntil)
-                GUI.Box(new Rect(Screen.width / 2 - 250, 30, 500, 40), toast, new GUIStyle(GUI.skin.box) { fontSize = 18, alignment = TextAnchor.MiddleCenter });
+            if (toast != null && Time.unscaledTime < toastUntil && Event.current.type == EventType.Repaint) Theme.Toast(toast);
             if (!menuOpen) return;
             KeepCursor();
             CaptureRebind();
-            if (h == null)
-            {
-                h = new GUIStyle(GUI.skin.label) { fontSize = 14, fontStyle = FontStyle.Bold, normal = { textColor = new Color(1f, 0.85f, 0.3f) } };
-                dim = new GUIStyle(GUI.skin.label) { fontSize = 11, wordWrap = true, normal = { textColor = new Color(0.78f, 0.78f, 0.78f) } };
-                section = new GUIStyle(GUI.skin.label) { fontSize = 13, fontStyle = FontStyle.Bold, normal = { textColor = new Color(1f, 0.75f, 0.35f) } };
-                tabOn = new GUIStyle(GUI.skin.button) { fontStyle = FontStyle.Bold, normal = { textColor = new Color(1f, 0.85f, 0.3f), background = GUI.skin.button.active.background } };
-            }
-            if (window.width < 10f) window = new Rect(40, 40, 620, 680);
-            window = GUILayout.Window(0xC4EE5E, window, DrawWindow, "Modzarella");
-            window.x = Mathf.Clamp(window.x, 0, Screen.width - 100);
+            if (window.width < 10f) window = new Rect((Screen.width - 820) / 2f, (Screen.height - 580) / 2f, 820, 580);
+            window = GUI.Window(0xC4EE5E, window, DrawWindow, GUIContent.none, Theme.Box(Theme.Bg, 14));
+            window.x = Mathf.Clamp(window.x, 0, Screen.width - 120);
             window.y = Mathf.Clamp(window.y, 0, Screen.height - 60);
         }
 
-        private void CaptureRebind()
+        void CaptureRebind()
         {
             var e = Event.current;
             if (rebinding == null) return;
@@ -137,148 +134,157 @@ namespace Modz
             }
         }
 
-        private void DrawWindow(int id)
+        static GUIStyle Btn(Color bg, Color hover, int size = 13, Color? text = null)
         {
-            var mods = Mods().ToList();
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(ModCommon.Active ? "Play Offline — mods active" : "Mods only run in Main Menu → Play Offline", dim);
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Close", GUILayout.Width(60))) SetMenu(false);
-            GUILayout.EndHorizontal();
+            var st = Theme.Box(bg, 8, 0);
+            st.hover.background = Theme.Round(hover, 8);
+            st.active.background = Theme.Round(Theme.Line, 8);
+            st.font = Theme.Font;
+            st.fontSize = size;
+            st.alignment = TextAnchor.MiddleCenter;
+            st.normal.textColor = st.hover.textColor = st.active.textColor = Theme.C(text ?? Theme.TextColor);
+            st.padding = new RectOffset(14, 14, 8, 8);
+            st.margin = new RectOffset(0, 8, 0, 8);
+            return st;
+        }
 
-            var names = new List<string> { "Home" };
-            names.AddRange(mods.Select(m => m.Metadata.Name));
-            names.Add("Controls");
-            var pages = mods;
-            page = Mathf.Clamp(page, 0, names.Count - 1);
-            GUILayout.BeginHorizontal();
-            for (int i = 0; i < names.Count; i++)
-                if (GUILayout.Button(names[i], i == page ? tabOn : GUI.skin.button)) { page = i; scroll = Vector2.zero; search = ""; }
-            GUILayout.EndHorizontal();
+        void DrawWindow(int id)
+        {
+            float w = window.width, h = window.height;
+            Theme.Text("Modzarella", new Rect(22, 14, 300, 30), 20, Theme.Accent, "left", true);
+            Theme.Text(ModCommon.Active ? "Play Offline · mods are on" : "Mods run in Play Offline", new Rect(160, 14, 300, 30), 12, Theme.Dim);
+            if (GUI.Button(new Rect(w - 92, 14, 72, 30), "Close", Btn(Theme.Card, Theme.Raised, 12))) SetMenu(false);
+            Theme.Rect(new Rect(0, 58, w, 1), Theme.Line);
 
-            scroll = GUILayout.BeginScrollView(scroll);
-            if (page == 0) DrawHome(pages);
-            else if (page == names.Count - 1) DrawControls(mods);
-            else DrawModPage(pages[page - 1]);
+            var pages = Pages();
+            page = Mathf.Clamp(page, 0, pages.Count - 1);
+            DrawSidebar(pages, new Rect(12, 70, 200, h - 82));
+            Theme.Rect(new Rect(224, 59, 1, h - 59), Theme.Line);
+            DrawPage(pages[page], new Rect(244, 70, w - 264, h - 82));
+            GUI.DragWindow(new Rect(0, 0, w, 58));
+        }
+
+        void DrawSidebar(List<Page> pages, Rect area)
+        {
+            GUILayout.BeginArea(area);
+            sideScroll = GUILayout.BeginScrollView(sideScroll, false, false, GUIStyle.none, GUIStyle.none);
+            for (int i = 0; i < pages.Count; i++)
+            {
+                var p = pages[i];
+                var st = Btn(i == page ? Theme.Raised : new Color(0, 0, 0, 0), i == page ? Theme.Raised : Theme.Card, 14);
+                st.alignment = TextAnchor.MiddleLeft;
+                st.padding = new RectOffset(32, 10, 9, 9);
+                st.margin = new RectOffset(0, 0, 0, 4);
+                var r = GUILayoutUtility.GetRect(new GUIContent(p.Name), st, GUILayout.ExpandWidth(true));
+                if (GUI.Button(r, p.Name, st)) { page = i; scroll = Vector2.zero; showMore = false; }
+                Color dot = p.Error != null ? Theme.Bad : p.Enabled == null || p.Enabled.Value ? Theme.Ok : Theme.Dim;
+                GUI.Box(new Rect(r.x + 13, r.center.y - 4, 8, 8), GUIContent.none, Theme.Box(dot, 4));
+            }
             GUILayout.EndScrollView();
-
-            GUILayout.Label(string.IsNullOrEmpty(GUI.tooltip) ? $"{ModCommon.Key(MenuKey.Value)}: menu · settings save automatically" : GUI.tooltip, dim, GUILayout.Height(30));
-            GUI.DragWindow();
+            GUILayout.EndArea();
         }
 
-        private void Actions(PluginInfo m, ConfigEntry<bool> sw)
+        void DrawPage(Page p, Rect area)
         {
-            var actions = MenuRegistry.Get(m.Metadata.GUID);
-            if (actions.Count == 0) return;
-            GUI.enabled = ModCommon.InRound && (sw == null || sw.Value);
+            GUILayout.BeginArea(area);
+            scroll = GUILayout.BeginScrollView(scroll, false, false, GUIStyle.none, GUIStyle.none);
+
             GUILayout.BeginHorizontal();
-            foreach (var a in actions)
-                if (GUILayout.Button(a.Key)) { try { a.Value(); } catch (System.Exception e) { Log.LogError(e); } }
+            GUILayout.Label(p.Name, Theme.TextStyle(22, Theme.TextColor, "left", true), GUILayout.Height(32));
+            GUILayout.Space(10);
+            GUILayout.Label("v" + p.Version, Theme.TextStyle(12, Theme.Dim), GUILayout.Height(32));
+            GUILayout.FlexibleSpace();
+            if (p.Lua != null && GUILayout.Button("Reload", Btn(Theme.Card, Theme.Raised, 11, Theme.Dim), GUILayout.Height(26))) LuaEngine.Reload(p.Lua);
+            if (p.Enabled != null) { GUILayout.Space(8); p.Enabled.Value = Switch(p.Enabled.Value); }
             GUILayout.EndHorizontal();
-            GUI.enabled = true;
-        }
+            GUILayout.Label(p.Description, Theme.TextStyle(13, Theme.Dim, "left", false, true));
+            GUILayout.Space(10);
 
-        private void DrawHome(List<PluginInfo> mods)
-        {
-            foreach (var m in mods)
+            if (p.Error != null)
             {
-                var sw = MasterSwitch(m);
-                GUILayout.BeginVertical(GUI.skin.box);
-                GUILayout.BeginHorizontal();
-                if (sw != null) sw.Value = GUILayout.Toggle(sw.Value, new GUIContent(" " + m.Metadata.Name, sw.Description.Description), h);
-                else GUILayout.Label(m.Metadata.Name, h);
-                GUILayout.FlexibleSpace();
-                GUILayout.Label("v" + m.Metadata.Version, dim, GUILayout.Width(50));
-                if (GUILayout.Button("Settings", GUILayout.Width(80))) { page = mods.IndexOf(m) + 1; scroll = Vector2.zero; }
-                GUILayout.EndHorizontal();
-                GUILayout.Label(Blurb(m), dim);
-                Actions(m, sw);
+                GUILayout.BeginVertical(Theme.Box(new Color(Theme.Bad.r, Theme.Bad.g, Theme.Bad.b, 0.15f), 8, 12));
+                GUILayout.Label("This mod stopped because of an error:", Theme.TextStyle(13, Theme.Bad, "left", true));
+                GUILayout.Label(p.Error, Theme.TextStyle(12, Theme.TextColor, "left", false, true));
                 GUILayout.EndVertical();
+                GUILayout.Space(10);
             }
-            if (MenuRegistry.Toggles.Count == 0) return;
-            GUILayout.Space(6);
-            GUILayout.Label("Quick toggles", h);
-            GUILayout.BeginVertical(GUI.skin.box);
-            foreach (var t in MenuRegistry.Toggles)
-                t.Value.Value = GUILayout.Toggle(t.Value.Value, new GUIContent(" " + t.Key, t.Value.Description.Description));
-            GUILayout.EndVertical();
-        }
 
-        private void DrawModPage(PluginInfo m)
-        {
-            var cfg = m.Instance.Config;
-            var sw = MasterSwitch(m);
-            if (sw != null) sw.Value = GUILayout.Toggle(sw.Value, new GUIContent($" {m.Metadata.Name} enabled", sw.Description.Description), h);
-            GUILayout.Label(Blurb(m), dim);
-            Actions(m, sw);
+            if (p.Buttons.Count > 0)
+            {
+                GUI.enabled = ModCommon.InRound && (p.Enabled == null || p.Enabled.Value) && p.Error == null;
+                GUILayout.BeginHorizontal();
+                foreach (var b in p.Buttons)
+                    if (GUILayout.Button(b.Key, Btn(Theme.Raised, Theme.Line))) { try { b.Value(); } catch (Exception e) { Log.LogError(e); } }
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+                GUI.enabled = true;
+                if (!ModCommon.InRound) GUILayout.Label("Buttons work during a round.", Theme.TextStyle(11, Theme.Dim));
+                GUILayout.Space(6);
+            }
 
+            var cfg = p.Config;
+            var entries = cfg.Where(kv => kv.Key.Section != "General" && kv.Key.Section != "Keys").ToList();
+            var basic = entries.Where(kv => !IsAdvanced(kv.Value)).ToList();
+            var more = entries.Where(kv => IsAdvanced(kv.Value)).ToList();
+            var keys = cfg.Where(kv => kv.Value is ConfigEntry<KeyboardShortcut>).ToList();
+
+            if (basic.Count > 0) { Heading("Settings"); foreach (var kv in basic) Row(kv.Key, kv.Value); }
+            if (keys.Count > 0) { Heading("Keys"); foreach (var kv in keys) Row(kv.Key, kv.Value); }
+            if (more.Count > 0)
+            {
+                GUILayout.Space(8);
+                if (GUILayout.Button(showMore ? "Hide extra settings" : $"More settings ({more.Count})", Btn(Theme.Card, Theme.Raised, 12, Theme.Dim))) showMore = !showMore;
+                if (showMore) foreach (var kv in more) Row(kv.Key, kv.Value);
+            }
+
+            GUILayout.Space(14);
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Search:", GUILayout.Width(52));
-            search = GUILayout.TextField(search);
-            showAdvanced = GUILayout.Toggle(showAdvanced, " Show advanced", GUILayout.Width(120));
+            GUILayout.Label(string.IsNullOrEmpty(GUI.tooltip) ? "Changes save automatically." : GUI.tooltip, Theme.TextStyle(12, Theme.Dim, "left", false, true));
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Reset to defaults", Btn(Theme.Card, Theme.Raised, 11, Theme.Dim)))
+                foreach (var kv in cfg) if (kv.Key.Section != "General") kv.Value.BoxedValue = kv.Value.DefaultValue;
             GUILayout.EndHorizontal();
 
-            string q = search.Trim().ToLowerInvariant();
-            foreach (var sec in cfg.Keys.Select(k => k.Section).Distinct().Where(x => x != "General" && x != "Keys"))
-            {
-                var entries = cfg.Where(k => k.Key.Section == sec)
-                    .Where(k => showAdvanced || q.Length > 0 || !IsAdvanced(k.Value))
-                    .Where(k => q.Length == 0 || k.Key.Key.ToLowerInvariant().Contains(q) || k.Value.Description.Description.ToLowerInvariant().Contains(q))
-                    .ToList();
-                if (entries.Count == 0) continue;
-                GUILayout.Space(6);
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(sec, section);
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button(new GUIContent("Reset", "Back to defaults for this section."), GUILayout.Width(60)))
-                    foreach (var kv in cfg.Where(k => k.Key.Section == sec)) kv.Value.BoxedValue = kv.Value.DefaultValue;
-                GUILayout.EndHorizontal();
-                GUILayout.BeginVertical(GUI.skin.box);
-                foreach (var kv in entries) DrawEntry(kv.Key, kv.Value);
-                GUILayout.EndVertical();
-            }
-            var keys = cfg.Where(k => k.Value is ConfigEntry<KeyboardShortcut>).ToList();
-            if (keys.Count == 0 || q.Length > 0) return;
-            GUILayout.Space(6);
-            GUILayout.Label("Keys", section);
-            GUILayout.BeginVertical(GUI.skin.box);
-            foreach (var kv in keys) DrawEntry(kv.Key, kv.Value);
-            GUILayout.EndVertical();
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
         }
 
-        private void DrawControls(List<PluginInfo> mods)
+        static bool IsAdvanced(ConfigEntryBase e) => e.Description.Tags != null && e.Description.Tags.Contains("Advanced");
+
+        static void Heading(string text)
         {
-            GUILayout.Label("Click a binding, then press a key or mouse button (Esc cancels). Ctrl/Shift/Alt combos work.", dim);
-            foreach (var m in mods)
-            {
-                var keys = m.Instance.Config.Where(kv => kv.Value is ConfigEntry<KeyboardShortcut>).ToList();
-                if (keys.Count == 0) continue;
-                GUILayout.Space(6);
-                GUILayout.Label(m.Metadata.Name, section);
-                GUILayout.BeginVertical(GUI.skin.box);
-                foreach (var kv in keys) DrawEntry(kv.Key, kv.Value);
-                GUILayout.EndVertical();
-            }
-            GUILayout.Space(8);
-            if (GUILayout.Button(new GUIContent("Reset every mod setting to defaults", "Everything, keys included.")))
-                foreach (var m in mods) foreach (var kv in m.Instance.Config) kv.Value.BoxedValue = kv.Value.DefaultValue;
+            GUILayout.Space(12);
+            GUILayout.Label(text.ToUpperInvariant(), Theme.TextStyle(11, Theme.Dim, "left", true), GUILayout.Height(22));
+            Theme.Rect(GUILayoutUtility.GetRect(1, 1, GUILayout.ExpandWidth(true)), Theme.Line);
+            GUILayout.Space(4);
         }
 
-        private void DrawEntry(ConfigDefinition def, ConfigEntryBase e)
+        static bool Switch(bool on)
         {
-            var label = new GUIContent(def.Key, e.Description.Description);
-            GUILayout.BeginHorizontal();
+            var r = GUILayoutUtility.GetRect(42, 24, GUILayout.Width(42), GUILayout.Height(24));
+            r.y += 4;
+            GUI.Box(r, GUIContent.none, Theme.Box(on ? Theme.Ok : Theme.Line, 11));
+            GUI.Box(new Rect(on ? r.xMax - 21 : r.x + 3, r.y + 3, 18, 18), GUIContent.none, Theme.Box(Color.white, 9));
+            var e = Event.current;
+            if (e.type == EventType.MouseDown && e.button == 0 && r.Contains(e.mousePosition)) { e.Use(); return !on; }
+            return on;
+        }
+
+        void Row(ConfigDefinition def, ConfigEntryBase e)
+        {
+            GUILayout.BeginHorizontal(GUILayout.Height(34));
+            GUILayout.Label(new GUIContent(def.Key, e.Description.Description), Theme.TextStyle(14, Theme.TextColor), GUILayout.Width(230), GUILayout.Height(30));
             switch (e)
             {
                 case ConfigEntry<bool> b:
-                    b.Value = GUILayout.Toggle(b.Value, new GUIContent(" " + def.Key, e.Description.Description));
+                    GUILayout.FlexibleSpace();
+                    b.Value = Switch(b.Value);
                     break;
                 case ConfigEntry<float> f:
                 {
                     var range = e.Description.AcceptableValues as AcceptableValueRange<float>;
                     float min = range?.MinValue ?? 0f, max = range?.MaxValue ?? Mathf.Max(1f, f.Value * 2f);
-                    GUILayout.Label(label, GUILayout.Width(190));
-                    float v = GUILayout.HorizontalSlider(f.Value, min, max, GUILayout.MinWidth(120));
+                    float v = Slider(f.Value, min, max);
                     if (!Mathf.Approximately(v, f.Value)) { f.Value = Mathf.Round(v * 100f) / 100f; numText.Remove(e); }
                     NumberField(e, f.Value.ToString("0.##", CultureInfo.InvariantCulture), s =>
                     {
@@ -290,47 +296,58 @@ namespace Modz
                 {
                     var range = e.Description.AcceptableValues as AcceptableValueRange<int>;
                     int min = range?.MinValue ?? 0, max = range?.MaxValue ?? Mathf.Max(10, i.Value * 2);
-                    GUILayout.Label(label, GUILayout.Width(190));
-                    int v = Mathf.RoundToInt(GUILayout.HorizontalSlider(i.Value, min, max, GUILayout.MinWidth(120)));
+                    int v = Mathf.RoundToInt(Slider(i.Value, min, max));
                     if (v != i.Value) { i.Value = v; numText.Remove(e); }
                     NumberField(e, i.Value.ToString(CultureInfo.InvariantCulture), s => { if (int.TryParse(s, out var nv)) i.Value = Mathf.Clamp(nv, min, max); });
                     break;
                 }
                 case ConfigEntry<string> str when e.Description.AcceptableValues is AcceptableValueList<string> list:
                 {
-                    GUILayout.Label(label, GUILayout.Width(190));
-                    int idx = System.Math.Max(0, System.Array.IndexOf(list.AcceptableValues, str.Value));
-                    if (GUILayout.Button("◄", GUILayout.Width(26))) str.Value = list.AcceptableValues[(idx + list.AcceptableValues.Length - 1) % list.AcceptableValues.Length];
-                    GUILayout.Label(str.Value, GUI.skin.box, GUILayout.ExpandWidth(true));
-                    if (GUILayout.Button("►", GUILayout.Width(26))) str.Value = list.AcceptableValues[(idx + 1) % list.AcceptableValues.Length];
+                    var opts = list.AcceptableValues;
+                    int idx = Math.Max(0, Array.IndexOf(opts, str.Value));
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button("<", Btn(Theme.Raised, Theme.Line), GUILayout.Width(34))) str.Value = opts[(idx + opts.Length - 1) % opts.Length];
+                    GUILayout.Label(str.Value, Theme.TextStyle(13, Theme.TextColor, "center"), GUILayout.Width(150), GUILayout.Height(30));
+                    if (GUILayout.Button(">", Btn(Theme.Raised, Theme.Line), GUILayout.Width(34))) str.Value = opts[(idx + 1) % opts.Length];
                     break;
                 }
-                case ConfigEntry<string> str:
-                    GUILayout.Label(label, GUILayout.Width(190));
-                    str.Value = GUILayout.TextField(str.Value);
-                    break;
                 case ConfigEntry<KeyboardShortcut> key:
-                    GUILayout.Label(label, GUILayout.Width(190));
-                    if (GUILayout.Button(rebinding == e ? "press a key…" : ModCommon.Key(key.Value))) rebinding = rebinding == e ? null : e;
-                    if (GUILayout.Button(new GUIContent("×", "Unbind"), GUILayout.Width(24))) key.Value = KeyboardShortcut.Empty;
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button(rebinding == e ? "Press a key…" : ModCommon.Key(key.Value), Btn(rebinding == e ? Theme.Accent : Theme.Raised, Theme.Line, 13, rebinding == e ? Theme.Bg : Theme.TextColor), GUILayout.MinWidth(110)))
+                        rebinding = rebinding == e ? null : e;
                     break;
-                default:
-                    GUILayout.Label($"{def.Key}: {e.BoxedValue}");
+                case ConfigEntry<string> str:
+                    str.Value = GUILayout.TextField(str.Value, Field(), GUILayout.ExpandWidth(true));
                     break;
-            }
-            if (!(e is ConfigEntry<KeyboardShortcut>) && !Equals(e.BoxedValue, e.DefaultValue)
-                && GUILayout.Button(new GUIContent("↺", "Reset to default: " + e.DefaultValue), GUILayout.Width(24)))
-            {
-                e.BoxedValue = e.DefaultValue;
-                numText.Remove(e);
             }
             GUILayout.EndHorizontal();
         }
 
-        private void NumberField(ConfigEntryBase e, string current, System.Action<string> commit)
+        static float Slider(float value, float min, float max)
+        {
+            var track = Theme.Box(Theme.Line, 3);
+            track.fixedHeight = 6;
+            track.margin = new RectOffset(0, 12, 13, 0);
+            var thumb = Theme.Box(Theme.Accent, 8);
+            thumb.fixedWidth = thumb.fixedHeight = 16;
+            thumb.margin = new RectOffset(0, 0, -5, 0);
+            return GUILayout.HorizontalSlider(value, min, max, track, thumb, GUILayout.ExpandWidth(true));
+        }
+
+        static GUIStyle Field()
+        {
+            var st = Theme.Box(Theme.Card, 6, 6);
+            st.font = Theme.Font; st.fontSize = 13;
+            st.normal.textColor = Theme.C(Theme.TextColor);
+            st.alignment = TextAnchor.MiddleCenter;
+            st.margin = new RectOffset(0, 0, 3, 0);
+            return st;
+        }
+
+        void NumberField(ConfigEntryBase e, string current, Action<string> commit)
         {
             if (!numText.TryGetValue(e, out var t)) t = current;
-            string nt = GUILayout.TextField(t, GUILayout.Width(56));
+            string nt = GUILayout.TextField(t, Field(), GUILayout.Width(60), GUILayout.Height(26));
             if (nt != t) numText[e] = nt;
             if (numText.ContainsKey(e) && (Event.current.isKey && Event.current.keyCode == KeyCode.Return || nt != t && nt.Length > 0 && !nt.EndsWith(".")))
                 commit(nt);
@@ -340,15 +357,9 @@ namespace Modz
     internal static class CorePatches
     {
         [HarmonyPrefix, HarmonyPatch(typeof(InputManager), nameof(InputManager.ShowCursor))]
-        private static bool KeepCursorForMenu() => !CorePlugin.MenuOpen;
+        static bool KeepCursorForMenu() => !CorePlugin.MenuOpen;
 
         [HarmonyPrefix, HarmonyPatch(typeof(InputManager), "Look")]
-        private static bool NoLookInMenu() => !CorePlugin.MenuOpen;
-
-        [HarmonyPrefix, HarmonyPatch(typeof(ActiveRagdoll), nameof(ActiveRagdoll.Input))]
-        private static bool SeatedNoInput(ActiveRagdoll __instance) => !CheeseApi.IsSeated(__instance) && !CheeseApi.IsDead(__instance);
-
-        [HarmonyPrefix, HarmonyPatch(typeof(ActiveRagdoll), "FixedUpdate")]
-        private static bool SeatedNoBalance(ActiveRagdoll __instance) => !CheeseApi.IsSeated(__instance) && !CheeseApi.IsDead(__instance);
+        static bool NoLookInMenu() => !CorePlugin.MenuOpen;
     }
 }
