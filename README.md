@@ -35,7 +35,7 @@ Modzarella is a mod manager for [Cheese Rolling](https://store.steampowered.com/
 - **One-click setup:** finds the game and installs the mod loader for you
 - **Mod browser:** turn mods on and off, update or uninstall them with one click
 - **In-game menu:** press **F1** to tweak every mod's settings and keys while playing
-- **Built-in extras:** free mouse camera, first person, zoom, endless rounds, frozen bots and slow motion
+- **Built-in extras:** freecam, mouse look, first person, zoom, endless rounds, frozen bots and slow motion
 - **Lua mods:** mods are plain Lua scripts, so making one needs no compiler
 - **Safe installs:** every download is checked before it touches your game
 - **Cross-platform:** native app for macOS, Windows and Linux
