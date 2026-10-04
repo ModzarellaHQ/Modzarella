@@ -196,7 +196,7 @@ namespace Modz
         public static GameObject Quad(string pool, int max, Vector3 point, Vector3 normal, Vector3 along, float w, float h, Material mat, Transform parent)
         {
             var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            Object.Destroy(q.GetComponent<Collider>());
+            Object.DestroyImmediate(q.GetComponent<Collider>());
             q.name = pool;
             if (!pools.TryGetValue(pool, out var queue)) pools[pool] = queue = new Queue<GameObject>();
             if (parent) q.transform.SetParent(parent, true);
