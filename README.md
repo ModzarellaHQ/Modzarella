@@ -7,7 +7,7 @@
   <a href="#install">Install</a> ·
   <a href="docs/troubleshooting.md">Help</a> ·
   <a href="https://github.com/ModzarellaHQ/Modz">Make mods</a> ·
-  <a href="https://modzarella.dev">Website</a>
+  <a href="https://modza.space">Website</a>
 </p>
 
 <p align="center">
