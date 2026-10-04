@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.1.3
 
 - Restart map (F6) and next map (F7) shortcuts
 - Settings: open the game and mods folders and the game log, reset mod settings
+- Blood and other marks lie on the ground instead of floating, and always appear
+- Seats use generic upright and reclined poses
 
 ## 1.1.2
 
