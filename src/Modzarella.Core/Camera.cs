@@ -15,6 +15,8 @@ namespace Modz
         public ConfigEntry<float> MouseSens, Zoom, SpeedFov;
         public ConfigEntry<KeyboardShortcut> FreeCamKey, FirstPersonKey;
 
+        public static Vector3 Shift;
+        public static float FovScale = 1f;
         internal Transform eye;
         private bool lockedCursor;
         private float lastMouseMove;
@@ -37,8 +39,6 @@ namespace Modz
             FirstPerson.SettingChanged += (_, __) => ModCommon.Toast(FirstPerson.Value ? "First person" : "Third person");
 
             CheeseApi.FirstPersonCheck = () => FPActive;
-            MenuRegistry.QuickToggle($"Free mouse camera ({ModCommon.Key(FreeCamKey.Value)})", FreeCam);
-            MenuRegistry.QuickToggle($"First person ({ModCommon.Key(FirstPersonKey.Value)})", FirstPerson);
             new Harmony(CorePlugin.GUID + ".camera").PatchAll(typeof(CameraPatches));
         }
 
@@ -136,9 +136,13 @@ namespace Modz
             return true;
         }
 
+        private static Vector3 appliedShift;
+
         [HarmonyPrefix, HarmonyPatch(typeof(CameraRig), "LateUpdate")]
         private static void Before(CameraRig __instance)
         {
+            if (__instance.mainCamera) __instance.mainCamera.transform.position -= appliedShift;
+            appliedShift = Vector3.zero;
             UpdateFirstPerson(__instance);
             if (!baseOffset.TryGetValue(__instance, out var b))
             {
@@ -163,7 +167,13 @@ namespace Modz
             if (CheeseApi.DriverVehicle && ModCommon.IsLocal(CheeseApi.Driver)) speed = CheeseApi.DriverVehicle.velocity.magnitude;
             else { var me = ModCommon.LocalRagdoll(); if (me) speed = me.velocity.magnitude; }
             fovBoost = Mathf.Lerp(fovBoost, Mathf.Clamp01((speed - 40f) / 220f) * C.SpeedFov.Value, 1f - Mathf.Exp(-Time.deltaTime * 3f));
-            __instance.mainCamera.fieldOfView = CameraRig.FOV + fovBoost;
+            __instance.mainCamera.fieldOfView = (CameraRig.FOV + fovBoost) * CameraFeature.FovScale;
+            if (CameraFeature.Shift != Vector3.zero && !C.FPActive)
+            {
+                var t = __instance.mainCamera.transform;
+                appliedShift = t.right * CameraFeature.Shift.x + t.up * CameraFeature.Shift.y + t.forward * CameraFeature.Shift.z;
+                t.position += appliedShift;
+            }
         }
 
         private static void UpdateFirstPerson(CameraRig rig)

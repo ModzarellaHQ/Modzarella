@@ -10,25 +10,19 @@ namespace Modz
 {
     public static class CheeseApi
     {
-        public const string CarName = "CheeseCar";
-        public const string ToiletName = "CheeseToilet";
-
         public static ActiveRagdoll Driver;
         public static Rigidbody DriverVehicle;
-        public static Action<RagdollPart, Vector3, Vector3, float> BulletHit;
-        public static Func<ActiveRagdoll, bool> DeadCheck;
         public static Func<bool> FirstPersonCheck;
-        public static Func<ActiveRagdoll, bool> HandsBusyCheck;
+        public static readonly HashSet<Rigidbody> Vehicles = new HashSet<Rigidbody>();
 
         private static readonly HashSet<ActiveRagdoll> seated = new HashSet<ActiveRagdoll>();
 
         public static bool MenuOpen => CorePlugin.MenuOpen;
         public static bool FirstPerson => FirstPersonCheck != null && FirstPersonCheck();
-        public static bool IsDead(ActiveRagdoll r) => r && DeadCheck != null && DeadCheck(r);
-        public static bool HandsBusy(ActiveRagdoll r) => r && HandsBusyCheck != null && HandsBusyCheck(r);
+        public static bool IsDead(ActiveRagdoll r) => Body.IsDead(r);
         public static bool IsDriving(ActiveRagdoll r) => Driver && r && Driver == r;
         public static bool IsSeated(ActiveRagdoll r) => r && (seated.Contains(r) || IsDriving(r));
-        public static bool IsVehicle(Rigidbody rb) => rb && (rb.name == CarName || rb.name == ToiletName);
+        public static bool IsVehicle(Rigidbody rb) => rb && Vehicles.Contains(rb);
 
         public static void SetSeated(ActiveRagdoll r, bool on)
         {
@@ -188,33 +182,6 @@ namespace Modz
         {
             if (src && clip) src.PlayOneShot(clip, volume * GameSfxVolume * 2f);
         }
-    }
-
-    public static class MenuRegistry
-    {
-        private static readonly Dictionary<string, List<KeyValuePair<string, Action>>> actions = new Dictionary<string, List<KeyValuePair<string, Action>>>();
-        private static readonly List<KeyValuePair<string, ConfigEntry<bool>>> toggles = new List<KeyValuePair<string, ConfigEntry<bool>>>();
-
-        public static void Action(string guid, string label, Action action)
-        {
-            var list = Get(guid);
-            list.RemoveAll(kv => kv.Key == label);
-            list.Add(new KeyValuePair<string, Action>(label, action));
-        }
-
-        public static void QuickToggle(string label, ConfigEntry<bool> entry)
-        {
-            toggles.RemoveAll(kv => kv.Key == label);
-            toggles.Add(new KeyValuePair<string, ConfigEntry<bool>>(label, entry));
-        }
-
-        public static List<KeyValuePair<string, Action>> Get(string guid)
-        {
-            if (!actions.TryGetValue(guid, out var l)) actions[guid] = l = new List<KeyValuePair<string, Action>>();
-            return l;
-        }
-
-        public static IReadOnlyList<KeyValuePair<string, ConfigEntry<bool>>> Toggles => toggles;
     }
 
     public static class Wav
