@@ -25,6 +25,7 @@ namespace Modz
         static Vector3 savedPos;
         static Quaternion savedRot;
         static float savedYaw, savedPitch;
+        internal static CameraRig flyRig;
         internal Transform eye;
         private bool lockedCursor;
         private float lastMouseMove;
@@ -82,6 +83,8 @@ namespace Modz
 
         private void Update()
         {
+            if (Flying && (!StageManager.Instance || StageManager.Instance.cameraRig != flyRig)) { Flying = false; flyRig = null; }
+            if (Flying && ModCommon.KeyDown(FlyKey.Value)) { SetFlying(false); return; }
             if (!ModCommon.InRound || CheeseApi.MenuOpen) { ReleaseCursor(); return; }
             if (ModCommon.KeyDown(FlyKey.Value)) SetFlying(!Flying);
             if (Flying) Fly();
@@ -102,7 +105,7 @@ namespace Modz
             Flying = on;
             if (on)
             {
-                // restored exactly when the freecam stops
+                flyRig = rig;
                 savedPos = t.position; savedRot = t.rotation; savedYaw = rig.yaw; savedPitch = rig.pitch;
                 var me = ModCommon.LocalRagdoll();
                 flyHeading = me ? Body.Facing(me) : Vector3.forward;
@@ -111,11 +114,12 @@ namespace Modz
                 flyYaw = e.y;
                 flyPitch = e.x > 180f ? e.x - 360f : e.x;
             }
-            else
+            else if (rig == flyRig)
             {
                 t.SetPositionAndRotation(savedPos, savedRot);
                 rig.yaw = savedYaw; rig.pitch = savedPitch;
             }
+            if (!on) flyRig = null;
             ModCommon.Toast(on ? $"Freecam · WASD fly · Shift fast · Space up · Ctrl down · {ModCommon.Key(FlyKey.Value)} to stop" : "Freecam off");
         }
 
@@ -202,7 +206,7 @@ namespace Modz
         [HarmonyPrefix, HarmonyPatch(typeof(CameraRig), "LateUpdate")]
         private static bool Before(CameraRig __instance)
         {
-            if (CameraFeature.Flying) return false;
+            if (CameraFeature.Flying && __instance == CameraFeature.flyRig) return false;
             if (__instance.mainCamera) __instance.mainCamera.transform.position -= appliedShift;
             appliedShift = Vector3.zero;
             UpdateFirstPerson(__instance);
@@ -231,7 +235,7 @@ namespace Modz
             else { var me = ModCommon.LocalRagdoll(); if (me) speed = me.velocity.magnitude; }
             fovBoost = Mathf.Lerp(fovBoost, Mathf.Clamp01((speed - 40f) / 220f) * C.SpeedFov.Value, 1f - Mathf.Exp(-Time.deltaTime * 3f));
             __instance.mainCamera.fieldOfView = (CameraRig.FOV + fovBoost) * CameraFeature.FovScale;
-            if (CameraFeature.Flying)
+            if (CameraFeature.Flying && __instance == CameraFeature.flyRig)
             {
                 __instance.mainCamera.transform.SetPositionAndRotation(CameraFeature.flyPos, Quaternion.Euler(CameraFeature.flyPitch, CameraFeature.flyYaw, 0f));
                 return;
