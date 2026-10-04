@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 
 namespace Modz
 {
+    [DefaultExecutionOrder(10000)]
     public class CameraFeature : MonoBehaviour
     {
         internal static CameraFeature Instance;
@@ -47,12 +48,15 @@ namespace Modz
 
         private readonly List<KeyValuePair<Transform, Vector3>> hidden = new List<KeyValuePair<Transform, Vector3>>();
 
-        private void OnEnable() { Camera.onPreCull += HideOwnHead; Camera.onPostRender += ShowOwnHead; }
-        private void OnDisable() { Camera.onPreCull -= HideOwnHead; Camera.onPostRender -= ShowOwnHead; }
+        // skinning happens before culling, so bones are shrunk at the end of LateUpdate and restored after rendering
+        private void OnEnable() => Camera.onPostRender += ShowOwnHead;
+        private void OnDisable() { Camera.onPostRender -= ShowOwnHead; ShowOwnHead(null); }
+        private void FixedUpdate() => ShowOwnHead(null);
 
-        private void HideOwnHead(Camera cam)
+        private void LateUpdate()
         {
-            if (!FPActive || !StageManager.Instance || cam != StageManager.Instance.cameraRig.mainCamera) return;
+            ShowOwnHead(null);
+            if (!FPActive || !StageManager.Instance) return;
             var me = ModCommon.LocalRagdoll();
             var parts = HideArms ? new[] { me.head, me.spine2, me.upperArmLeft, me.lowerArmLeft, me.handLeft, me.upperArmRight, me.lowerArmRight, me.handRight } : new[] { me.head, me.spine2 };
             foreach (var part in parts)
