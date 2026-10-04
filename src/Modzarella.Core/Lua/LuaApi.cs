@@ -30,7 +30,7 @@ namespace Modz
 
     public static class LuaApi
     {
-        public static bool InputAllowed => Application.isFocused && !CorePlugin.MenuOpen && !ModCommon.Paused;
+        public static bool InputAllowed => Application.isFocused && !CorePlugin.MenuOpen && !ModCommon.Paused && !CameraFeature.Flying;
 
         static readonly Dictionary<string, Type> types = new Dictionary<string, Type>();
         static readonly Dictionary<string, GlbLoader.CarModel> models = new Dictionary<string, GlbLoader.CarModel>();
@@ -186,7 +186,24 @@ namespace Modz
             game["seated"] = (Func<ActiveRagdoll, bool>)CheeseApi.IsSeated;
             game["set_driver"] = Fn(s, a => { CheeseApi.Driver = Arg<ActiveRagdoll>(a, 0); CheeseApi.DriverVehicle = Arg<Rigidbody>(a, 1); return null; });
             game["driver"] = Fn(s, a => CheeseApi.Driver);
-            game["add_vehicle"] = Fn(s, a => { CheeseApi.Vehicles.Add(a[0].ToObject<Rigidbody>()); return null; });
+            game["add_vehicle"] = Fn(s, a =>
+            {
+                var wheels = a.Count > 1 && a[1].Type == DataType.Table ? a[1].Table.Values.Select(v => v.ToObject<Transform>()).ToArray() : new Transform[0];
+                CheeseApi.Vehicles[a[0].ToObject<Rigidbody>()] = wheels;
+                return null;
+            });
+            game["vehicles"] = Fn(s, a =>
+            {
+                var t = new Table(s);
+                foreach (var kv in CheeseApi.Vehicles.Where(kv => kv.Key).ToList())
+                {
+                    var v = new Table(s);
+                    v["body"] = kv.Key;
+                    v["wheels"] = List(s, kv.Value.Where(w => w));
+                    t.Append(DynValue.NewTable(v));
+                }
+                return t;
+            });
             game["is_vehicle"] = Fn(s, a => CheeseApi.IsVehicle(Arg<Rigidbody>(a, 0)));
             g["game"] = game;
 
@@ -239,6 +256,8 @@ namespace Modz
             cam["first_person"] = Fn(s, a => CheeseApi.FirstPerson);
             cam["shift"] = Fn(s, a => { CameraFeature.Shift = Arg(a, 0, Vector3.zero); return null; });
             cam["fov"] = Fn(s, a => { CameraFeature.FovScale = Arg(a, 0, 1f); return null; });
+            cam["hide_arms"] = Fn(s, a => { CameraFeature.HideArms = Arg(a, 0, false); return null; });
+            cam["flying"] = Fn(s, a => CameraFeature.Flying);
             cam["to_screen"] = Fn(s, a =>
             {
                 var c = StageManager.Instance.cameraRig.mainCamera;

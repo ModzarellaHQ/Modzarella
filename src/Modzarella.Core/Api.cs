@@ -13,7 +13,7 @@ namespace Modz
         public static ActiveRagdoll Driver;
         public static Rigidbody DriverVehicle;
         public static Func<bool> FirstPersonCheck;
-        public static readonly HashSet<Rigidbody> Vehicles = new HashSet<Rigidbody>();
+        public static readonly Dictionary<Rigidbody, Transform[]> Vehicles = new Dictionary<Rigidbody, Transform[]>();
 
         private static readonly HashSet<ActiveRagdoll> seated = new HashSet<ActiveRagdoll>();
 
@@ -22,7 +22,7 @@ namespace Modz
         public static bool IsDead(ActiveRagdoll r) => Body.IsDead(r);
         public static bool IsDriving(ActiveRagdoll r) => Driver && r && Driver == r;
         public static bool IsSeated(ActiveRagdoll r) => r && (seated.Contains(r) || IsDriving(r));
-        public static bool IsVehicle(Rigidbody rb) => rb && Vehicles.Contains(rb);
+        public static bool IsVehicle(Rigidbody rb) => rb && Vehicles.ContainsKey(rb);
 
         public static void SetSeated(ActiveRagdoll r, bool on)
         {
