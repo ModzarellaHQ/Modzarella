@@ -365,8 +365,6 @@ namespace Modz
             fx["decal"] = Fn(s, a => Decals.Quad(a[0].String, (int)a[1].Number, a[2].ToObject<Vector3>(), a[3].ToObject<Vector3>(), Arg(a, 4, Vector3.zero),
                 (float)a[5].Number, (float)a[6].Number, a[7].ToObject<Material>(), Arg<Transform>(a, 8)));
             fx["decals"] = Fn(s, a => List(s, Decals.All(a[0].String).Where(x => x)));
-            fx["dent"] = (Action<Transform, Vector3, Vector3, float, float>)Dents.Dent;
-            fx["undent"] = (Action<Transform>)Dents.Restore;
             g["fx"] = fx;
 
             var physics = new Table(s);

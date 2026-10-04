@@ -152,7 +152,6 @@ Unity's own types are available: `Vector3`, `Quaternion`, `Color`, `Mathf`, `Tim
 | `fx.particles(object, { lifetime, speed, size, color, gravity, rate, angle, collide, stretch, grow, fade, loop, material })` | A particle system; `{a, b}` means a random range |
 | `fx.emit(ps, count)`, `fx.rate(ps, n)`, `fx.speed(ps, a, b)`, `fx.tint(ps, color)` | |
 | `fx.decal(pool, max, point, normal, along, width, height, material, parent)` | Flat mark on a surface; the oldest go past `max` |
-| `fx.dent(transform, point, dir, radius, depth)`, `fx.undent(transform)` | Deform and restore a mesh |
 
 ## Camera and input
 

@@ -99,55 +99,6 @@ namespace Modz
         }
     }
 
-    public static class Dents
-    {
-        static readonly Dictionary<MeshFilter, (Mesh original, Vector3[] verts)> dents = new Dictionary<MeshFilter, (Mesh, Vector3[])>();
-
-        public static void Dent(Transform root, Vector3 point, Vector3 dir, float radius, float depth)
-        {
-            if (!root || depth <= 0f) return;
-            foreach (var mf in root.GetComponentsInChildren<MeshFilter>())
-            {
-                if (!mf.sharedMesh) continue;
-                if (!dents.TryGetValue(mf, out var d))
-                {
-                    if (!mf.sharedMesh.isReadable) continue;
-                    var orig = mf.sharedMesh;
-                    mf.sharedMesh = Object.Instantiate(orig);
-                    dents[mf] = d = (orig, mf.sharedMesh.vertices);
-                }
-                float sc = mf.transform.lossyScale.x;
-                Vector3 lp = mf.transform.InverseTransformPoint(point);
-                Vector3 ld = mf.transform.InverseTransformDirection(dir).normalized;
-                float r = radius / sc, r2 = r * r, dd = depth / sc;
-                var v = d.verts;
-                bool any = false;
-                for (int i = 0; i < v.Length; i++)
-                {
-                    float dist2 = (v[i] - lp).sqrMagnitude;
-                    if (dist2 >= r2) continue;
-                    float f = 1f - Mathf.Sqrt(dist2) / r;
-                    v[i] += ld * (dd * f * f) + Random.insideUnitSphere * (dd * 0.08f * f);
-                    any = true;
-                }
-                if (any) { mf.sharedMesh.vertices = v; mf.sharedMesh.RecalculateBounds(); }
-            }
-        }
-
-        public static void Restore(Transform root)
-        {
-            if (!root) return;
-            foreach (var mf in root.GetComponentsInChildren<MeshFilter>())
-            {
-                if (!dents.TryGetValue(mf, out var d)) continue;
-                var copy = mf.sharedMesh;
-                mf.sharedMesh = d.original;
-                if (copy && copy != d.original) Object.Destroy(copy);
-                dents.Remove(mf);
-            }
-        }
-    }
-
     public static class Particles
     {
         static ParticleSystem.MinMaxCurve Curve(DynValue v, float fallback)
