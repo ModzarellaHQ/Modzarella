@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace CheeseMM;
+namespace Modzarella;
 
 public record ModFile(string Path, string Target, long Size, string Sha256);
 public record Mod(string Id, string Name, string Version, string Author, string Description, string[] Dependencies, string[]? Credits, ModFile[] Files);

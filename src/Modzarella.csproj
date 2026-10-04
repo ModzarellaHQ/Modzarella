@@ -1,14 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <OutputType Condition="$(RuntimeIdentifier.StartsWith('win'))">WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>cheesemm</AssemblyName>
+    <AssemblyName>Modzarella</AssemblyName>
     <Version>1.0.0</Version>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <ApplicationIcon>../assets/icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Photino.NET" Version="4.0.16" />
     <EmbeddedResource Include="ui.html" LogicalName="ui.html" />
   </ItemGroup>
 </Project>

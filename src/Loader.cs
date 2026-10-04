@@ -1,6 +1,6 @@
 using System.IO.Compression;
 
-namespace CheeseMM;
+namespace Modzarella;
 
 public static class Loader
 {

@@ -1,4 +1,5 @@
 bin/
 obj/
-publish/
+build/
+dist/
 .DS_Store

@@ -1,16 +1,15 @@
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 
-namespace CheeseMM;
+namespace Modzarella;
 
 public static class Web
 {
     static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
-    public static async Task Serve(Settings settings, HttpClient http)
+    public static string Start(Settings settings, HttpClient http, Action quit)
     {
         var probe = new TcpListener(IPAddress.Loopback, 0);
         probe.Start();
@@ -20,10 +19,12 @@ public static class Web
         var listener = new HttpListener();
         listener.Prefixes.Add(url);
         listener.Start();
-        Console.WriteLine($"CheeseMM is running at {url} (Ctrl+C to quit)");
-        if (Environment.GetEnvironmentVariable("CHEESEMM_NO_BROWSER") == null)
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        _ = Loop(listener, settings, http, quit);
+        return url;
+    }
 
+    static async Task Loop(HttpListener listener, Settings settings, HttpClient http, Action quit)
+    {
         var html = new StreamReader(typeof(Web).Assembly.GetManifestResourceStream("ui.html")!).ReadToEnd();
         while (true)
         {
@@ -33,7 +34,7 @@ public static class Web
             try
             {
                 if (path == "/") { await Send(ctx, html, "text/html"); continue; }
-                if (path == "/api/quit") { await Send(ctx, "{}", "application/json"); return; }
+                if (path == "/api/quit") { await Send(ctx, "{}", "application/json"); quit(); return; }
                 reply = path switch
                 {
                     "/api/state" => await State(settings, http),
@@ -67,6 +68,7 @@ public static class Web
         return new
         {
             source = settings.Source,
+            gameDir = settings.GameDir,
             game = game == null ? null : new { game.Dir, platform = game.Platform.ToString(), loader = game.LoaderInstalled },
             mods = mods.Select(m => new { mod = m, state = game == null ? "NotInstalled" : Catalog.StateOf(game, m).ToString() }),
             error,
@@ -92,7 +94,12 @@ public static class Web
             case "enable": return [Catalog.SetEnabled(game, r.Id!, true)];
             case "disable": return [Catalog.SetEnabled(game, r.Id!, false)];
             case "update": return await catalog.UpdateAll(game);
-            case "launch": return [game.Launch()];
+            case "launch":
+                var steps = new List<string>();
+                if (!game.LoaderInstalled) steps.Add(await Loader.Install(game, http));
+                if (Catalog.Installed(game, "core") == null) steps.AddRange(await catalog.Install(game, "core"));
+                steps.Add(game.Launch());
+                return steps;
             default: throw new Exception("Unknown action " + r.Action);
         }
     }

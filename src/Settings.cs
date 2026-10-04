@@ -1,14 +1,14 @@
 using System.Text.Json;
 
-namespace CheeseMM;
+namespace Modzarella;
 
 public class Settings
 {
-    public const string DefaultSource = "https://raw.githubusercontent.com/CheeseMods/CheeseMods/main/";
+    public const string DefaultSource = "https://modzarellahq.github.io/Modz/";
     public string Source { get; set; } = DefaultSource;
     public string? GameDir { get; set; }
 
-    static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CheeseMM", "settings.json");
+    static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Modzarella", "settings.json");
 
     public static Settings Load() =>
         File.Exists(FilePath) ? JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath)) ?? new() : new();

@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-namespace CheeseMM;
+namespace Modzarella;
 
 public enum Platform { Mac, Windows, Proton }
 
@@ -11,8 +11,8 @@ public record Game(string Dir, Platform Platform)
     public const int SteamAppId = 3809440;
     public const string FolderName = "Cheese Rolling";
 
-    public string Plugins => Path.Combine(Dir, "BepInEx", "plugins", "CheeseMods");
-    public string Disabled => Path.Combine(Dir, "BepInEx", "plugins-disabled", "CheeseMods");
+    public string Plugins => Path.Combine(Dir, "BepInEx", "plugins", "Modz");
+    public string Disabled => Path.Combine(Dir, "BepInEx", "plugins-disabled", "Modz");
     public bool LoaderInstalled => File.Exists(Path.Combine(Dir, "BepInEx", "core", "BepInEx.dll"));
 
     public static Game? Find(string? overrideDir)
