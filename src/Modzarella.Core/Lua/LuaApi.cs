@@ -111,7 +111,7 @@ namespace Modz
             g["primitive"] = Fn(s, a =>
             {
                 var go = GameObject.CreatePrimitive((PrimitiveType)Enum.Parse(typeof(PrimitiveType), a[0].String, true));
-                if (!(a.Count > 2 && a[2].CastToBool())) UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
+                if (!(a.Count > 2 && a[2].CastToBool())) { var c = go.GetComponent<Collider>(); c.enabled = false; UnityEngine.Object.Destroy(c); }
                 var parent = Arg<Transform>(a, 1);
                 if (parent) go.transform.SetParent(parent, false);
                 return go;
