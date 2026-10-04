@@ -49,7 +49,6 @@ Define any of these as global functions. They only run during a round, in Play O
 | `draw()` | When the screen is drawn; use `ui.*` here |
 | `on_round_start()` | A new round began; objects from the last one are gone |
 | `on_part_hit(part, collision)` | A body part hit something |
-| `on_disable()` | The player switched the mod off |
 | `on_unload()` | Before **Reload**; clean up what you spawned |
 
 ## Settings and menu
