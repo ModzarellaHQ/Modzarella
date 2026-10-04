@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/macOS-black?style=flat-square&logo=apple" alt="macOS">
   <img src="https://img.shields.io/badge/Windows-0078D4?style=flat-square&logo=windows" alt="Windows">
   <img src="https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black" alt="Linux">
-  <img src="https://img.shields.io/badge/license-MIT-f5b830?style=flat-square" alt="MIT">
+  <img src="https://img.shields.io/badge/license-MIT-c8202f?style=flat-square" alt="MIT">
 </p>
 
 Modzarella is a mod manager for [Cheese Rolling](https://store.steampowered.com/app/3809440/). Pick your mods, press Play, and you're in.
