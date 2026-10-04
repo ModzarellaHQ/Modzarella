@@ -382,7 +382,7 @@ namespace Modz
                 var o = a.Count > 5 && a[5].Type == DataType.Table ? a[5].Table : null;
                 Theme.Text(a[0].ToPrintString(), new Rect((float)a[1].Number, (float)a[2].Number, (float)a[3].Number, (float)a[4].Number),
                     (int)(o?.Get("size").CastToNumber() ?? 14), o != null && !o.Get("color").IsNil() ? o.Get("color").ToObject<Color>() : Theme.TextColor,
-                    o?.Get("align").CastToString() ?? "left", o != null && o.Get("bold").CastToBool());
+                    o?.Get("align").CastToString() ?? "left", o != null && o.Get("bold").CastToBool(), o != null && o.Get("mono").CastToBool());
                 return null;
             });
             ui["rect"] = Fn(s, a => { Theme.Rect(new Rect((float)a[0].Number, (float)a[1].Number, (float)a[2].Number, (float)a[3].Number), a[4].ToObject<Color>(), Arg(a, 5, 0f)); return null; });
