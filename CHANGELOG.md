@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Restart map (F6) and next map (F7) shortcuts
+- Settings: open the game and mods folders and the game log, reset mod settings
+
 ## 1.1.2
 
 - Mods are downloaded from modza.space/modz; existing installs switch over automatically
