@@ -192,12 +192,25 @@ namespace Modz
     public static class Decals
     {
         static readonly Dictionary<string, Queue<GameObject>> pools = new Dictionary<string, Queue<GameObject>>();
+        static Mesh quad;
+
+        static Mesh QuadMesh
+        {
+            get
+            {
+                if (quad) return quad;
+                var tmp = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                quad = tmp.GetComponent<MeshFilter>().sharedMesh;
+                Object.Destroy(tmp);
+                return quad;
+            }
+        }
 
         public static GameObject Quad(string pool, int max, Vector3 point, Vector3 normal, Vector3 along, float w, float h, Material mat, Transform parent)
         {
-            var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            Object.DestroyImmediate(q.GetComponent<Collider>());
-            q.name = pool;
+            var q = new GameObject(pool);
+            q.AddComponent<MeshFilter>().sharedMesh = QuadMesh;
+            q.AddComponent<MeshRenderer>();
             if (!pools.TryGetValue(pool, out var queue)) pools[pool] = queue = new Queue<GameObject>();
             if (parent) q.transform.SetParent(parent, true);
             q.transform.position = point + normal * (0.02f + queue.Count * 0.00005f);
@@ -205,6 +218,7 @@ namespace Modz
             q.transform.rotation = f.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(-normal, f) : Quaternion.LookRotation(-normal) * Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
             Vector3 ls = parent ? parent.lossyScale : Vector3.one;
             q.transform.localScale = new Vector3(w / ls.x, h / ls.y, 1f);
+            if (!parent) q.AddComponent<SurfaceDecal>();
             var rend = q.GetComponent<Renderer>();
             rend.sharedMaterial = mat;
             rend.receiveShadows = false;
@@ -215,5 +229,57 @@ namespace Modz
         }
 
         public static IEnumerable<GameObject> All(string pool) => pools.TryGetValue(pool, out var q) ? q : (IEnumerable<GameObject>)new GameObject[0];
+    }
+
+    // a world decal draped over the ground under it, refitted when it grows
+    public class SurfaceDecal : MonoBehaviour
+    {
+        const int N = 4;
+        Mesh mesh;
+        Vector3 fitted;
+
+        void Start() => Fit();
+
+        void LateUpdate()
+        {
+            var sc = transform.localScale;
+            if (Mathf.Abs(sc.x - fitted.x) > fitted.x * 0.1f || Mathf.Abs(sc.y - fitted.y) > fitted.y * 0.1f) Fit();
+        }
+
+        void OnDestroy() { if (mesh) Destroy(mesh); }
+
+        void Fit()
+        {
+            var t = transform;
+            fitted = t.localScale;
+            float reach = Mathf.Max(fitted.x, fitted.y) * 0.5f + 0.2f;
+            var verts = new Vector3[(N + 1) * (N + 1)];
+            var uv = new Vector2[verts.Length];
+            for (int y = 0, i = 0; y <= N; y++)
+            for (int x = 0; x <= N; x++, i++)
+            {
+                var local = new Vector3(x / (float)N - 0.5f, y / (float)N - 0.5f, 0f);
+                uv[i] = new Vector2(x / (float)N, y / (float)N);
+                var world = t.TransformPoint(local);
+                if (Physics.Raycast(world - t.forward * reach, t.forward, out var hit, reach * 2f, ModCommon.GroundMask, QueryTriggerInteraction.Ignore))
+                    local.z = t.InverseTransformPoint(hit.point - t.forward * 0.02f).z;
+                verts[i] = local;
+            }
+            var tris = new int[N * N * 6];
+            for (int y = 0, k = 0; y < N; y++)
+            for (int x = 0; x < N; x++)
+            {
+                int a = y * (N + 1) + x, b = a + 1, c = a + N + 1, d = c + 1;
+                tris[k++] = a; tris[k++] = c; tris[k++] = b;
+                tris[k++] = b; tris[k++] = c; tris[k++] = d;
+            }
+            if (!mesh) { mesh = new Mesh { name = "SurfaceDecal" }; GetComponent<MeshFilter>().sharedMesh = mesh; }
+            mesh.Clear();
+            mesh.vertices = verts;
+            mesh.uv = uv;
+            mesh.triangles = tris;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+        }
     }
 }
