@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.Json;
 
 namespace Modzarella;
@@ -8,8 +7,17 @@ namespace Modzarella;
 public static class Web
 {
     static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+    static readonly SemaphoreSlim busy = new(1, 1);
 
-    public static string Start(Settings settings, HttpClient http, Action quit)
+    static readonly Dictionary<string, (string Resource, string Type)> files = new()
+    {
+        ["/"] = ("ui.html", "text/html"),
+        ["/ui.css"] = ("ui.css", "text/css"),
+        ["/ui.js"] = ("ui.js", "text/javascript"),
+        ["/theme.css"] = ("theme.css", "text/css"),
+    };
+
+    public static string Start(Settings settings, HttpClient http)
     {
         var probe = new TcpListener(IPAddress.Loopback, 0);
         probe.Start();
@@ -19,32 +27,66 @@ public static class Web
         var listener = new HttpListener();
         listener.Prefixes.Add(url);
         listener.Start();
-        _ = Loop(listener, settings, http, quit);
+        _ = Loop(listener, settings, http, $"127.0.0.1:{port}");
         return url;
     }
 
-    static async Task Loop(HttpListener listener, Settings settings, HttpClient http, Action quit)
+    static async Task Loop(HttpListener listener, Settings settings, HttpClient http, string host)
     {
-        var html = new StreamReader(typeof(Web).Assembly.GetManifestResourceStream("ui.html")!).ReadToEnd()
-            .Replace("/* theme.css */", new StreamReader(typeof(Web).Assembly.GetManifestResourceStream("theme.css")!).ReadToEnd());
+        var cache = files.Values.ToDictionary(f => f.Resource, f => Read(f.Resource));
         while (true)
         {
             var ctx = await listener.GetContextAsync();
-            var path = ctx.Request.Url!.AbsolutePath;
-            object reply;
-            try
+            _ = Handle(ctx, settings, http, host, cache);
+        }
+    }
+
+    static byte[] Read(string resource)
+    {
+        using var s = typeof(Web).Assembly.GetManifestResourceStream(resource)!;
+        using var m = new MemoryStream();
+        s.CopyTo(m);
+        return m.ToArray();
+    }
+
+    static async Task Handle(HttpListenerContext ctx, Settings settings, HttpClient http, string host, Dictionary<string, byte[]> cache)
+    {
+        var req = ctx.Request;
+        var res = ctx.Response;
+        res.Headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data:; frame-ancestors 'none'; form-action 'none'; base-uri 'none'";
+        res.Headers["X-Content-Type-Options"] = "nosniff";
+        res.Headers["Referrer-Policy"] = "no-referrer";
+        res.Headers["Cache-Control"] = "no-store";
+        try
+        {
+            if (req.Headers["Host"] != host) { await Send(res, 403, new { error = "forbidden" }); return; }
+            var path = req.Url!.AbsolutePath;
+            if (files.TryGetValue(path, out var file))
             {
-                if (path == "/") { await Send(ctx, html, "text/html"); continue; }
-                if (path == "/api/quit") { await Send(ctx, "{}", "application/json"); quit(); return; }
-                reply = path switch
-                {
-                    "/api/state" => await State(settings, http),
-                    "/api/do" => new { log = await Do(settings, http, (await JsonSerializer.DeserializeAsync<Request>(ctx.Request.InputStream, Json))!) },
-                    _ => new { error = "not found" },
-                };
+                if (req.HttpMethod != "GET") { await Send(res, 405, new { error = "method not allowed" }); return; }
+                await Send(res, 200, cache[file.Resource], file.Type);
+                return;
             }
-            catch (Exception e) { reply = new { error = e.Message }; }
-            await Send(ctx, JsonSerializer.Serialize(reply, Json), "application/json");
+            if (path == "/api/state" && req.HttpMethod == "GET") { await Send(res, 200, await State(settings, http)); return; }
+            if (path == "/api/do")
+            {
+                var origin = req.Headers["Origin"];
+                if (req.HttpMethod != "POST" || req.ContentType?.StartsWith("application/json") != true || (origin != null && origin != $"http://{host}"))
+                {
+                    await Send(res, 403, new { error = "forbidden" });
+                    return;
+                }
+                var r = (await JsonSerializer.DeserializeAsync<Request>(req.InputStream, Json))!;
+                await busy.WaitAsync();
+                try { await Send(res, 200, new { log = await Do(settings, http, r) }); }
+                finally { busy.Release(); }
+                return;
+            }
+            await Send(res, 404, new { error = "not found" });
+        }
+        catch (Exception e)
+        {
+            try { await Send(res, 500, new { error = e.Message }); } catch { }
         }
     }
 
@@ -56,13 +98,16 @@ public static class Web
         return path.StartsWith(home) ? "~" + path[home.Length..] : path;
     }
 
-    static async Task Send(HttpListenerContext ctx, string body, string type)
+    static Task Send(HttpListenerResponse res, int status, object reply) =>
+        Send(res, status, JsonSerializer.SerializeToUtf8Bytes(reply, Json), "application/json");
+
+    static async Task Send(HttpListenerResponse res, int status, byte[] body, string type)
     {
-        var bytes = Encoding.UTF8.GetBytes(body);
-        ctx.Response.ContentType = type + "; charset=utf-8";
-        ctx.Response.ContentLength64 = bytes.Length;
-        await ctx.Response.OutputStream.WriteAsync(bytes);
-        ctx.Response.Close();
+        res.StatusCode = status;
+        res.ContentType = type + "; charset=utf-8";
+        res.ContentLength64 = body.Length;
+        await res.OutputStream.WriteAsync(body);
+        res.Close();
     }
 
     static async Task<object> State(Settings settings, HttpClient http)

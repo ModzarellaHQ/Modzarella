@@ -19,7 +19,7 @@ static class Program
 
     static int Window(Settings settings, HttpClient http)
     {
-        var url = Web.Start(settings, http, () => Environment.Exit(0));
+        var url = Web.Start(settings, http);
         if (Environment.GetEnvironmentVariable("MODZARELLA_BROWSER") == null)
             try
             {
