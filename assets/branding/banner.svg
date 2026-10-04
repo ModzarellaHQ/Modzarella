@@ -1,16 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#202028"/><stop offset="1" stop-color="#121216"/></linearGradient>
-    <linearGradient id="top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#f7c63c"/></linearGradient>
-    <linearGradient id="side" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5b830"/><stop offset="1" stop-color="#d98d14"/></linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e2720"/><stop offset="1" stop-color="#1a1511"/></linearGradient>
+    <radialGradient id="glow" cx="0.82" cy="0.1" r="0.7"><stop offset="0" stop-color="#c8202f" stop-opacity="0.32"/><stop offset="1" stop-color="#c8202f" stop-opacity="0"/></radialGradient>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2d47e"/><stop offset="1" stop-color="#d9a441"/></linearGradient>
+    <linearGradient id="side" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9a441"/><stop offset="1" stop-color="#a87526"/></linearGradient>
   </defs>
-  <rect width="1280" height="320" rx="28" fill="url(#bg)"/>
-  <g transform="translate(120,40) scale(0.24)">
+  <rect width="1280" height="320" rx="24" fill="url(#wood)"/>
+  <rect width="1280" height="320" rx="24" fill="url(#glow)"/>
+  <rect x="1" y="1" width="1278" height="318" rx="23" fill="none" stroke="#0d0a08" stroke-width="2"/>
+  <line x1="24" y1="2.5" x2="1256" y2="2.5" stroke="#ffffff" stroke-opacity="0.08"/>
+  <g transform="translate(110,52) scale(0.23)">
     <path d="M190 470 L760 300 L840 430 Z" fill="url(#top)"/>
     <path d="M190 470 L840 430 L840 700 L190 760 Z" fill="url(#side)"/>
-    <circle cx="360" cy="600" r="54" fill="#b8700e"/><circle cx="560" cy="540" r="36" fill="#b8700e"/>
-    <circle cx="660" cy="640" r="46" fill="#b8700e"/><circle cx="470" cy="690" r="24" fill="#b8700e"/>
+    <circle cx="360" cy="600" r="54" fill="#8a5e1c"/><circle cx="560" cy="540" r="36" fill="#8a5e1c"/>
+    <circle cx="660" cy="640" r="46" fill="#8a5e1c"/><circle cx="470" cy="690" r="24" fill="#8a5e1c"/>
   </g>
-  <text x="400" y="160" font-family="Helvetica, Arial, sans-serif" font-size="92" font-weight="800" fill="#f5b830">Modzarella</text>
-  <text x="404" y="218" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#c8c8d2">Mods for Cheese Rolling, one click away.</text>
+  <text x="390" y="168" font-family="Archivo, Helvetica Neue, Arial, sans-serif" font-size="96" font-weight="900" letter-spacing="-2" fill="#f0e6d2">Modz<tspan fill="#c8202f">arella</tspan></text>
+  <text x="394" y="222" font-family="IBM Plex Mono, Menlo, monospace" font-size="26" fill="#a39581">mods for cheese rolling · macOS · windows · linux</text>
 </svg>
