@@ -74,10 +74,11 @@ namespace Modz
             if (Endless.Value) tags.Add("Endless round");
             if (FreezeBots.Value) tags.Add("Bots frozen");
             if (SlowMo.Value) tags.Add("Slow motion");
+            if (CameraFeature.Flying) tags.Add("Freecam");
             if (tags.Count == 0) return;
-            string text = string.Join("  ·  ", tags.ToArray()).ToLowerInvariant();
-            float w = Theme.TextStyle(11, Theme.Brass, "center", true, false, true).CalcSize(new GUIContent(text)).x + 28;
-            Theme.Badge(new Rect(18, 16, w, 30), text);
+            string text = string.Join("  ·  ", tags.ToArray());
+            float w = Theme.TextStyle(11, Theme.Dim, "center").CalcSize(new GUIContent(text)).x + 20;
+            Theme.Badge(new Rect(12, 12, w, 22), text);
         }
     }
 
