@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Mods are downloaded from modza.space/mods; existing installs switch over automatically
+
 ## 1.1.0
 
 - New look for the app, the F1 menu and the website, with colours shared in `assets/theme.css`
