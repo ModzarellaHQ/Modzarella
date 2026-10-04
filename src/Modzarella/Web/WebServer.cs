@@ -57,6 +57,12 @@ public static class Web
 
     record Request(string Action, string? Id, string? Value);
 
+    static string Pretty(string path)
+    {
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return path.StartsWith(home) ? "~" + path[home.Length..] : path;
+    }
+
     static async Task Send(HttpListenerContext ctx, string body, string type)
     {
         var bytes = Encoding.UTF8.GetBytes(body);
@@ -77,7 +83,7 @@ public static class Web
         {
             source = settings.Source,
             gameDir = settings.GameDir,
-            game = game == null ? null : new { game.Dir, platform = game.Platform.ToString(), loader = game.LoaderInstalled },
+            game = game == null ? null : new { Dir = Pretty(game.Dir), platform = game.Platform.ToString(), loader = game.LoaderInstalled },
             mods = mods.Select(m => new { mod = m, state = game == null ? "NotInstalled" : Catalog.StateOf(game, m).ToString() }),
             error,
         };
