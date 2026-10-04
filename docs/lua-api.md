@@ -37,6 +37,24 @@ end
 
 Settings, keys and buttons appear on the mod's page in the F1 menu. Press **Reload** there to rerun `main.lua` after editing it.
 
+## Building blocks
+
+You rarely start from zero. Core does the hard parts that several mods share, so a new vehicle, weapon or gadget is mostly a model, some tuning and a few calls:
+
+| Block | What it handles | Calls | Used by |
+|---|---|---|---|
+| Seats | Puts a body on a seat in an upright or reclined pose, hands on a target, safe to get on and off | `body.seat` | BMW, Rocket Toilet |
+| Vehicles | Registers anything driveable so the camera and other mods react to it | `game.add_vehicle`, `game.vehicles`, `game.set_driver` | BMW, Rocket Toilet, Euphoria |
+| Holding things | Hands grip an object, arms relax, the body faces where you aim | `body.grip`, `body.set_hands_busy`, `body.heading` | Guns |
+| Muscles | Bends limbs toward a direction or point, cheaply on many bodies | `body.align`, `body.reach` | Euphoria, Guns |
+| Wounds and limbs | Marks wounds and turns a limb into a loose piece | `body.mark_wound`, `body.gib` | Euphoria |
+| Models | Loads `.glb` files, finds wheels, scales to size | `model.load`, `model.clone` | BMW, Guns, Rocket Toilet |
+| Camera | Follow targets, over-the-shoulder offset, zoom, first person, viewmodels | `camera.target`, `camera.shift`, `camera.fov`, `camera.hide_arms` | BMW, Guns, Rocket Toilet |
+| Effects and sound | Particles, decals, materials, positional sound | `fx.*`, `mat.*`, `audio.*` | All |
+| Events | Mods react to each other without depending on each other | `events.on`, `events.emit` | Guns and Euphoria |
+
+The Rocket Toilet and the BMW are a good example: both are a model, a seat and a vehicle registration, with their own movement code on top.
+
 ## Callbacks
 
 Define any of these as global functions. They only run during a round, in Play Offline.
