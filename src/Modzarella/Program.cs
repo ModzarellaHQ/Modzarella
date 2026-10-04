@@ -30,6 +30,7 @@ static class Program
                     .Center()
                     .SetDevToolsEnabled(false)
                     .SetContextMenuEnabled(false)
+                    .RegisterWindowCreatedHandler((w, _) => NoFullscreen.Apply((PhotinoWindow)w!))
                     .Load(new Uri(url))
                     .WaitForClose();
                 return 0;
