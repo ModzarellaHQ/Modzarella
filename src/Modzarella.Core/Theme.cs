@@ -96,7 +96,7 @@ namespace Modz
             var st = new GUIStyle { normal = { background = Solid(normal) }, hover = { background = Solid(hover) }, active = { background = Solid(Line) } };
             st.normal.textColor = st.hover.textColor = st.active.textColor = C(text);
             st.font = Sans; st.fontSize = 12; st.alignment = TextAnchor.MiddleCenter;
-            st.padding = new RectOffset(10, 10, 4, 4); st.margin = new RectOffset(0, 6, 2, 2); st.fixedHeight = 24;
+            st.padding = new RectOffset(10, 10, 2, 6); st.margin = new RectOffset(0, 6, 2, 2); st.fixedHeight = 24;
             return st;
         }
 
@@ -105,7 +105,7 @@ namespace Modz
 
         public static GUIStyle Field => field ?? (field = new GUIStyle(ControlStyle(FieldBg, FieldBg, TextColor))
         {
-            font = Mono, alignment = TextAnchor.MiddleLeft, padding = new RectOffset(7, 7, 2, 2),
+            font = Mono, alignment = TextAnchor.MiddleLeft, padding = new RectOffset(7, 7, 1, 4),
             focused = { background = Solid(FieldBg), textColor = C(TextColor) },
         });
 
