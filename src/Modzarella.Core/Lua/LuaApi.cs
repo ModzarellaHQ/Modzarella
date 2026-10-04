@@ -356,8 +356,15 @@ namespace Modz
             {
                 var hits = Physics.RaycastAll(a[0].ToObject<Vector3>(), a[1].ToObject<Vector3>(), (float)a[2].Number, Arg(a, 3, ~0), QueryTriggerInteraction.Ignore);
                 var skip = Arg<Rigidbody>(a, 4);
-                var best = hits.Where(h => !skip || h.rigidbody != skip).OrderBy(h => h.distance).ToArray();
-                return best.Length > 0 ? (object)best[0] : null;
+                bool noParts = Arg(a, 5, false);
+                RaycastHit? best = null;
+                foreach (var h in hits)
+                {
+                    if (skip && h.rigidbody == skip) continue;
+                    if (noParts && h.collider.GetComponent<RagdollPart>()) continue;
+                    if (best == null || h.distance < best.Value.distance) best = h;
+                }
+                return best.HasValue ? (object)best.Value : null;
             });
             physics["raycast_all"] = Fn(s, a => List(s, Physics.RaycastAll(a[0].ToObject<Vector3>(), a[1].ToObject<Vector3>(), (float)a[2].Number, Arg(a, 3, ~0), QueryTriggerInteraction.Ignore).OrderBy(h => h.distance).Cast<object>()));
             physics["overlap"] = Fn(s, a => List(s, Physics.OverlapSphere(a[0].ToObject<Vector3>(), (float)a[1].Number, Arg(a, 2, ~0), QueryTriggerInteraction.Ignore)));
