@@ -83,7 +83,7 @@ namespace Modz
             GUI.matrix = m;
         }
 
-        public static void Panel(Rect r, float alpha = 0.97f)
+        public static void Panel(Rect r, float alpha = 0.9f)
         {
             Rect(r, new Color(Line.r, Line.g, Line.b, alpha));
             Rect(new Rect(r.x + 1, r.y + 1, r.width - 2, r.height - 2), new Color(Bg.r, Bg.g, Bg.b, alpha));
