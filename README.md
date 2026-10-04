@@ -27,7 +27,7 @@ Modzarella is a mod manager for [Cheese Rolling](https://store.steampowered.com/
   <img src="docs/screenshots/bmw.jpg" alt="Driving the BMW" width="24%">
   <img src="docs/screenshots/guns.jpg" alt="Shooting the AK-47 in first person" width="24%">
   <img src="docs/screenshots/toilet.jpg" alt="Flying the rocket toilet" width="24%">
-  <img src="docs/screenshots/euphoria.jpg" alt="Euphoria after a crash" width="24%">
+  <img src="docs/screenshots/euphoria.jpg" alt="A wounded bot with Euphoria" width="24%">
 </p>
 
 ## Features
