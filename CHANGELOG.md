@@ -8,6 +8,8 @@
 - Freecam (F3) that leaves your character alone and restores the view afterwards
 - First person: your body faces where you look
 - New logo and icons
+- The app window can no longer go fullscreen or maximize
+- The app's local server only answers its own window
 
 ## 1.0.0
 
