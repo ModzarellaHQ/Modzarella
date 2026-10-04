@@ -102,8 +102,6 @@ namespace Modz
         public static void Reach(RagdollPart hand, RagdollPart lower, RagdollPart upper, Vector3 target, float k, float d)
         {
             if (!Live(upper) || !Live(lower)) return;
-            var r = upper.ragdoll;
-            if (r && handsBusy.Contains(r) && (hand == r.handLeft || hand == r.handRight)) return;
             Align(upper, lower, ((target - upper.transform.position).normalized + Vector3.down * 0.15f).normalized, k, d);
             if (Live(hand)) Align(lower, hand, target - lower.transform.position, k * 0.8f, d);
         }
