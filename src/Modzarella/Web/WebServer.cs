@@ -11,6 +11,14 @@ public static class Web
     static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
     static readonly SemaphoreSlim busy = new(1, 1);
     static Task<(string Version, string Url)?>? appUpdate;
+    static readonly string AppVersion = typeof(Web).Assembly.GetName().Version!.ToString(3);
+    static readonly Dictionary<string, string> links = new()
+    {
+        ["site"] = "https://modza.space",
+        ["github"] = "https://github.com/ModzarellaHQ/Modzarella",
+        ["issues"] = "https://github.com/ModzarellaHQ/Modzarella/issues",
+        ["license"] = "https://github.com/ModzarellaHQ/Modzarella/blob/main/LICENSE",
+    };
 
     static async Task<(string Version, string Url)?> LatestApp(HttpClient http)
     {
@@ -85,10 +93,11 @@ public static class Web
                 return;
             }
             if (path == "/api/state" && req.HttpMethod == "GET") { await Send(res, 200, await State(settings, http)); return; }
+            if (path == "/api/status" && req.HttpMethod == "GET") { await Send(res, 200, new { running = Game.Running() }); return; }
             if (path == "/api/do")
             {
                 var origin = req.Headers["Origin"];
-                if (req.HttpMethod != "POST" || req.ContentType?.StartsWith("application/json") != true || (origin != null && origin != $"http://{host}"))
+                if (req.HttpMethod != "POST" || req.ContentType?.StartsWith("application/json") != true || (origin != null && origin != $"http://{host}") || req.ContentLength64 > 16384)
                 {
                     await Send(res, 403, new { error = "forbidden" });
                     return;
@@ -140,6 +149,8 @@ public static class Web
         {
             source = settings.Source,
             autoUpdate = settings.AutoUpdate,
+            version = AppVersion,
+            running = Game.Running(),
             appUpdate = app == null ? null : new { version = app.Value.Version },
             gameDir = settings.GameDir,
             game = game == null ? null : new { Dir = Pretty(game.Dir), platform = game.Platform.ToString(), loader = game.LoaderInstalled },
@@ -158,6 +169,13 @@ public static class Web
             Process.Start(new ProcessStartInfo(rel.Url) { UseShellExecute = true });
             return [$"Opened the Modzarella {rel.Version} download page."];
         }
+        if (r.Action == "link")
+        {
+            if (r.Value == null || !links.TryGetValue(r.Value, out var url)) throw new Exception("Unknown link");
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            return [$"Opened {url}"];
+        }
+        if (r.Action == "stop") return [Game.Stop()];
         if (r.Action == "game") { settings.GameDir = string.IsNullOrWhiteSpace(r.Value) ? null : r.Value.Trim(); settings.Save(); return ["Game folder set."]; }
         var game = Game.Find(settings.GameDir) ?? throw new Exception("Cheese Rolling not found. Set the game folder.");
         var catalog = new Catalog(settings.Source, http);
@@ -185,6 +203,7 @@ public static class Web
             case "disable": return [Catalog.SetEnabled(game, r.Id!, false)];
             case "update": return await catalog.UpdateAll(game);
             case "launch":
+                if (Game.Running()) return ["The game is already running."];
                 var steps = new List<string>();
                 if (settings.AutoUpdate) steps.AddRange((await catalog.UpdateAll(game)).Where(l => !l.StartsWith("Everything")));
                 if (!game.LoaderInstalled) steps.Add(await Loader.Install(game, http));
