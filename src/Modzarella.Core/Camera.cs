@@ -12,11 +12,14 @@ namespace Modz
         internal static CameraFeature Instance;
 
         public ConfigEntry<bool> Enabled, FreeCam, FirstPerson, InvertY, AutoCenter, ScrollZoom;
-        public ConfigEntry<float> MouseSens, Zoom, SpeedFov;
-        public ConfigEntry<KeyboardShortcut> FreeCamKey, FirstPersonKey;
+        public ConfigEntry<float> MouseSens, Zoom, SpeedFov, FlySpeed;
+        public ConfigEntry<KeyboardShortcut> FlyKey, FirstPersonKey;
 
         public static Vector3 Shift;
         public static float FovScale = 1f;
+        public static bool HideArms, Flying;
+        internal static Vector3 flyPos;
+        internal static float flyYaw, flyPitch;
         internal Transform eye;
         private bool lockedCursor;
         private float lastMouseMove;
@@ -25,7 +28,7 @@ namespace Modz
         {
             Instance = this;
             Enabled = Config.Bind("Camera", "Camera features", true, "Mouse camera, first person, zoom and speed FOV.");
-            FreeCam = Config.Bind("Camera", "Free mouse camera", true, "The mouse turns the camera instead of it auto-turning towards the cheese.");
+            FreeCam = Config.Bind("Camera", "Mouse look", true, "The mouse turns the camera instead of it auto-turning towards the cheese.");
             FirstPerson = Config.Bind("Camera", "First person", false, "See through your character's eyes.");
             MouseSens = Config.Bind("Camera", "Mouse sensitivity", 0.15f, ModCommon.Desc("Degrees per pixel of mouse movement.", new AcceptableValueRange<float>(0.02f, 1f)));
             Zoom = Config.Bind("Camera", "Zoom", 1f, ModCommon.Desc("Camera distance multiplier.", new AcceptableValueRange<float>(0.4f, 4f)));
@@ -33,9 +36,9 @@ namespace Modz
             AutoCenter = Config.Bind("Camera", "Recentre behind vehicle", true, ModCommon.Desc("While driving, swing back behind the car when the mouse is idle.", advanced: true));
             ScrollZoom = Config.Bind("Camera", "Scroll wheel zoom", true, ModCommon.Desc("Mouse wheel zooms.", advanced: true));
             SpeedFov = Config.Bind("Camera", "Speed FOV boost", 14f, ModCommon.Desc("Extra field of view at high speed.", new AcceptableValueRange<float>(0f, 40f), true));
-            FreeCamKey = Config.Bind("Keys", "Free camera", new KeyboardShortcut(KeyCode.F3), "Toggle the free mouse camera.");
+            FlySpeed = Config.Bind("Camera", "Freecam speed", 12f, ModCommon.Desc("Metres per second. Hold Shift for four times faster.", new AcceptableValueRange<float>(1f, 60f)));
+            FlyKey = Config.Bind("Keys", "Freecam", new KeyboardShortcut(KeyCode.F3), "Fly the camera around freely. Your character stays put.");
             FirstPersonKey = Config.Bind("Keys", "First person", new KeyboardShortcut(KeyCode.V), "Toggle first person.");
-            FreeCam.SettingChanged += (_, __) => ModCommon.Toast(FreeCam.Value ? "Free camera" : "Auto camera");
             FirstPerson.SettingChanged += (_, __) => ModCommon.Toast(FirstPerson.Value ? "First person" : "Third person");
 
             CheeseApi.FirstPersonCheck = () => FPActive;
@@ -51,7 +54,8 @@ namespace Modz
         {
             if (!FPActive || !StageManager.Instance || cam != StageManager.Instance.cameraRig.mainCamera) return;
             var me = ModCommon.LocalRagdoll();
-            foreach (var part in new[] { me.head, me.spine2 })
+            var parts = HideArms ? new[] { me.head, me.spine2, me.upperArmLeft, me.lowerArmLeft, me.handLeft, me.upperArmRight, me.lowerArmRight, me.handRight } : new[] { me.head, me.spine2 };
+            foreach (var part in parts)
             {
                 if (!part || part.transform.localScale.x < 0.01f) continue;
                 hidden.Add(new KeyValuePair<Transform, Vector3>(part.transform, part.transform.localScale));
@@ -71,7 +75,8 @@ namespace Modz
         private void Update()
         {
             if (!ModCommon.InRound || CheeseApi.MenuOpen) { ReleaseCursor(); return; }
-            if (ModCommon.KeyDown(FreeCamKey.Value)) FreeCam.Value = !FreeCam.Value;
+            if (ModCommon.KeyDown(FlyKey.Value)) SetFlying(!Flying);
+            if (Flying) Fly();
             if (ModCommon.KeyDown(FirstPersonKey.Value)) FirstPerson.Value = !FirstPerson.Value;
             if (ScrollZoom.Value && Mouse.current != null)
             {
@@ -79,6 +84,43 @@ namespace Modz
                 if (Mathf.Abs(sc) > 0.01f) Zoom.Value = Mathf.Clamp(Zoom.Value * (sc > 0 ? 0.9f : 1.1f), 0.4f, 4f);
             }
             MouseLook();
+        }
+
+        void SetFlying(bool on)
+        {
+            var cam = StageManager.Instance ? StageManager.Instance.cameraRig.mainCamera : null;
+            if (on && !cam) return;
+            Flying = on;
+            if (on)
+            {
+                flyPos = cam.transform.position;
+                var e = cam.transform.eulerAngles;
+                flyYaw = e.y;
+                flyPitch = e.x > 180f ? e.x - 360f : e.x;
+            }
+            ModCommon.Toast(on ? $"Freecam · WASD fly · Shift fast · Space up · Ctrl down · {ModCommon.Key(FlyKey.Value)} to stop" : "Freecam off");
+        }
+
+        void Fly()
+        {
+            var kb = Keyboard.current;
+            if (!Application.isFocused || kb == null) return;
+            if (Mouse.current != null)
+            {
+                Vector2 d = Mouse.current.delta.ReadValue() * MouseSens.Value;
+                flyYaw += d.x;
+                flyPitch = Mathf.Clamp(flyPitch - (InvertY.Value ? -d.y : d.y), -89f, 89f);
+            }
+            var rot = Quaternion.Euler(flyPitch, flyYaw, 0f);
+            Vector3 move = Vector3.zero;
+            if (kb.wKey.isPressed) move += rot * Vector3.forward;
+            if (kb.sKey.isPressed) move -= rot * Vector3.forward;
+            if (kb.dKey.isPressed) move += rot * Vector3.right;
+            if (kb.aKey.isPressed) move -= rot * Vector3.right;
+            if (kb.spaceKey.isPressed || kb.eKey.isPressed) move += Vector3.up;
+            if (kb.leftCtrlKey.isPressed || kb.qKey.isPressed) move -= Vector3.up;
+            float speed = FlySpeed.Value * 10f * (kb.leftShiftKey.isPressed ? 4f : 1f);
+            flyPos += move.normalized * speed * Time.unscaledDeltaTime;
         }
 
         private void ReleaseCursor()
@@ -91,10 +133,11 @@ namespace Modz
         private void MouseLook()
         {
             var rig = StageManager.Instance ? StageManager.Instance.cameraRig : null;
-            bool want = Enabled.Value && (FreeCam.Value || FPActive) && !ModCommon.Paused && !GameManager.IAmCheese() && Application.isFocused && rig;
+            if (!ModCommon.InRound && Flying) Flying = false;
+            bool want = Enabled.Value && (FreeCam.Value || FPActive || Flying) && !ModCommon.Paused && !GameManager.IAmCheese() && Application.isFocused && rig;
             if (!want) { ReleaseCursor(); return; }
             if (!lockedCursor) { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; lockedCursor = true; }
-            if (Mouse.current != null)
+            if (Mouse.current != null && !Flying)
             {
                 Vector2 d = Mouse.current.delta.ReadValue() * MouseSens.Value;
                 if (d.sqrMagnitude > 0.0001f) lastMouseMove = Time.unscaledTime;
@@ -168,6 +211,11 @@ namespace Modz
             else { var me = ModCommon.LocalRagdoll(); if (me) speed = me.velocity.magnitude; }
             fovBoost = Mathf.Lerp(fovBoost, Mathf.Clamp01((speed - 40f) / 220f) * C.SpeedFov.Value, 1f - Mathf.Exp(-Time.deltaTime * 3f));
             __instance.mainCamera.fieldOfView = (CameraRig.FOV + fovBoost) * CameraFeature.FovScale;
+            if (CameraFeature.Flying)
+            {
+                __instance.mainCamera.transform.SetPositionAndRotation(CameraFeature.flyPos, Quaternion.Euler(CameraFeature.flyPitch, CameraFeature.flyYaw, 0f));
+                return;
+            }
             if (CameraFeature.Shift != Vector3.zero && !C.FPActive)
             {
                 var t = __instance.mainCamera.transform;

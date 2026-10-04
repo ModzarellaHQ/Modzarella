@@ -196,6 +196,7 @@ namespace Modz
 
         internal static void Prune()
         {
+            CheeseApi.Vehicles.Keys.Where(k => !k).ToList().ForEach(k => CheeseApi.Vehicles.Remove(k));
             hits.Keys.Where(k => !k).ToList().ForEach(k => hits.Remove(k));
             lastVel.Keys.Where(k => !k).ToList().ForEach(k => lastVel.Remove(k));
             wounds.Keys.Where(k => !k).ToList().ForEach(k => { wounds.Remove(k); woundTime.Remove(k); });
@@ -250,6 +251,7 @@ namespace Modz
         static bool Input(ActiveRagdoll __instance, ref RagdollInput input)
         {
             if (CheeseApi.IsSeated(__instance) || Body.IsDead(__instance)) return false;
+            if (CameraFeature.Flying && ModCommon.IsLocal(__instance)) input = new RagdollInput(false, false, false, Vector3.zero, input.InputNumber);
             if (!Body.Reaches(__instance) && (input.TargetCheese || input.TargetRagdolls))
                 input = new RagdollInput(false, false, input.Jump, input.Movement, input.InputNumber);
             return true;
