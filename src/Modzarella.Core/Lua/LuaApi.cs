@@ -71,8 +71,9 @@ namespace Modz
 
         static string ModPath(LuaMod mod, string rel)
         {
+            var root = Path.GetFullPath(mod.Dir).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
             var full = Path.GetFullPath(Path.Combine(mod.Dir, rel));
-            if (!full.StartsWith(Path.GetFullPath(mod.Dir))) throw new ScriptRuntimeException("paths must stay inside the mod folder");
+            if (!full.StartsWith(root, StringComparison.Ordinal)) throw new ScriptRuntimeException("paths must stay inside the mod folder");
             return full;
         }
 

@@ -68,7 +68,9 @@ namespace Modz
             mod.Timers.Clear();
             listeners.RemoveAll(l => l.mod == mod);
             var script = new Script(CoreModules.Preset_SoftSandbox | CoreModules.LoadMethods);
-            script.Options.ScriptLoader = new FileSystemScriptLoader { ModulePaths = new[] { Path.Combine(mod.Dir, "?.lua") } };
+            script.Options.ScriptLoader = new ModScriptLoader { ModulePaths = new[] { Path.Combine(mod.Dir, "?.lua") } };
+            script.Globals["dofile"] = DynValue.Nil;
+            script.Globals["loadfile"] = DynValue.Nil;
             mod.Script = script;
             try
             {
@@ -184,5 +186,12 @@ namespace Modz
         bool Current(DynValue fn) => fn != null && Mod.Running && fn.Function.OwnerScript == Mod.Script;
         void OnCollisionEnter(Collision c) { if (Current(OnHit)) LuaEngine.Invoke(Mod, OnHit, c); }
         void OnCollisionStay(Collision c) { if (Current(OnStay)) LuaEngine.Invoke(Mod, OnStay, c); }
+    }
+
+    // require only resolves plain module names inside the mod folder
+    class ModScriptLoader : FileSystemScriptLoader
+    {
+        public override string ResolveModuleName(string modname, Table globalContext) =>
+            modname.IndexOfAny(new[] { '/', '\\', '.' }) >= 0 ? null : base.ResolveModuleName(modname, globalContext);
     }
 }
