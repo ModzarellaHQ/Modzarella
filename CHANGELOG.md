@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0
+
+- Installed and Browse tabs: browse mods to install, manage the ones you have
+- Play turns into Stop while the game runs
+- The app shows its version, with an About section in Settings and About Modzarella in the macOS app menu
+- Lighter: the mod list is only downloaded when it changed, updates reuse unchanged files, mod models are 80% smaller, and the app uses less memory
+- Security: mod ids and file paths from a mod list can't escape the mods folder, the BepInEx download is checked against its known checksum, and Lua mods can only read files inside their own folder
+- Fixes: an update that fails no longer removes the mod, a broken settings file no longer stops the app, and the in-game Core no longer keeps memory from previous maps
+- Square scrollbars and no bottom bar in the app
+
 ## 1.1.4
 
 - Freecam stops cleanly when the map changes, and its key always turns it off
