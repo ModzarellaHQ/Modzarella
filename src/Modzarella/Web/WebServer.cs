@@ -34,14 +34,6 @@ public static class Web
             try
             {
                 if (path == "/") { await Send(ctx, html, "text/html"); continue; }
-                if (path.StartsWith("/fonts/") && typeof(Web).Assembly.GetManifestResourceStream(path[1..]) is { } font)
-                {
-                    ctx.Response.ContentType = "font/woff2";
-                    ctx.Response.Headers["Cache-Control"] = "max-age=31536000";
-                    await font.CopyToAsync(ctx.Response.OutputStream);
-                    ctx.Response.Close();
-                    continue;
-                }
                 if (path == "/api/quit") { await Send(ctx, "{}", "application/json"); quit(); return; }
                 reply = path switch
                 {
