@@ -53,7 +53,7 @@ You rarely start from zero. Core does the hard parts that several mods share, so
 | Effects and sound | Particles, decals, materials, positional sound | `fx.*`, `mat.*`, `audio.*` | All |
 | Events | Mods react to each other without depending on each other | `events.on`, `events.emit` | Guns and Euphoria |
 
-The Rocket Toilet and the BMW are a good example: both are a model, a seat and a vehicle registration, with their own movement code on top.
+The Rocket Toilet and Sports Cars are a good example: both are a model, a seat and a vehicle registration, with their own movement code on top.
 
 ## Callbacks
 
