@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1
+
+- Renamed mods replace their old version automatically (BMW becomes Sports Cars)
+- Particle effects can be stacked on one object
+
 ## 1.2.0
 
 - Installed and Browse tabs: browse mods to install, manage the ones you have
