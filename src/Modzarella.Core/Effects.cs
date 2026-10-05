@@ -113,6 +113,12 @@ namespace Modz
 
         public static ParticleSystem Create(GameObject go, Table o)
         {
+            if (go.GetComponent<ParticleSystem>())
+            {
+                var child = new GameObject("particles") { layer = go.layer };
+                child.transform.SetParent(go.transform, false);
+                go = child;
+            }
             var ps = go.AddComponent<ParticleSystem>();
             ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             var main = ps.main;
