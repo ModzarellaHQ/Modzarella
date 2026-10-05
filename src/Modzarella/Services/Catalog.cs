@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 namespace Modzarella;
 
 public record ModFile(string Path, string Target, long Size, string Sha256);
-public record Mod(string Id, string Name, string Version, string Author, string Description, string[] Dependencies, string[]? Credits, ModFile[] Files);
+public record Mod(string Id, string Name, string Version, string Author, string Description, string[] Dependencies, string[]? Credits, ModFile[] Files, string[]? Replaces = null);
 record Index(Mod[] Mods);
 
 public enum State { NotInstalled, Enabled, Disabled, UpdateAvailable }
@@ -125,6 +125,13 @@ public class Catalog(string source, HttpClient http)
     {
         var all = await Mods();
         var log = new List<string>();
+        // a mod that was renamed lists its old id in "replaces": swap the old install for the new one
+        foreach (var m in all.Where(m => m.Replaces != null && StateOf(game, m) == State.NotInstalled))
+            foreach (var old in m.Replaces!.Where(o => ValidId(o) && Installed(game, o) != null))
+            {
+                log.AddRange(await Install(game, m.Id, all));
+                log.Add(Remove(game, old));
+            }
         foreach (var m in all.Where(m => StateOf(game, m) == State.UpdateAvailable))
         {
             bool wasDisabled = Directory.Exists(System.IO.Path.Combine(game.Disabled, m.Id));
