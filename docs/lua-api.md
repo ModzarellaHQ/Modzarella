@@ -208,6 +208,19 @@ events.emit("bullet_hit", part, point, dir, power)
 
 Events in use: `bullet_hit(part, point, dir, power)` and `wheels_bloody(rigidbody, point)`. Emitting an event nobody listens to is fine, so mods never need each other installed.
 
+## Online
+
+When **Online mods (experimental)** is on and every player in an online lobby has the same mods, mods run online too, and can talk to each other:
+
+| Call | |
+|---|---|
+| `net.ready()` | True when online mods are on in this lobby |
+| `net.send(name, table, reliable)` | Send a table to the other players' copies of this mod. Unreliable by default, for frequent updates |
+| `net.on(name, fn(sender, table))` | React when another player's copy sends `name` |
+| `net.me()` | Your Steam id, as text |
+
+Tables can hold numbers, strings, booleans and other tables. Send vectors as `{ x, y, z }`. Game tweaks such as slow motion stay offline only.
+
 ## Speed
 
 Every call between Lua and the game costs a few microseconds. Per frame that's fine. For work on every ragdoll every physics step, use `hold` on muscles and only decide every few steps, the way Euphoria's reactions do.
