@@ -93,7 +93,7 @@ namespace Modz
             Rect(new Rect(r.x + 1, r.y + 1, r.width - 2, r.height - 2), new Color(Bg.r, Bg.g, Bg.b, alpha));
         }
 
-        static GUIStyle button, accentButton, field, toggle, slider, thumb;
+        static GUIStyle button, accentButton, fieldStyle, toggle, slider, thumb;
 
         static GUIStyle ControlStyle(Color normal, Color hover, Color text)
         {
@@ -107,7 +107,7 @@ namespace Modz
         public static GUIStyle Button => button ?? (button = ControlStyle(Control, ControlHover, TextColor));
         public static GUIStyle AccentButton => accentButton ?? (accentButton = ControlStyle(Accent, AccentHover, OnAccent));
 
-        public static GUIStyle Field => field ?? (field = new GUIStyle(ControlStyle(FieldBg, FieldBg, TextColor))
+        public static GUIStyle Field => fieldStyle ?? (fieldStyle = new GUIStyle(ControlStyle(FieldBg, FieldBg, TextColor))
         {
             font = Mono, alignment = TextAnchor.MiddleLeft, padding = new RectOffset(7, 7, 1, 4),
             focused = { background = Solid(FieldBg), textColor = C(TextColor) },
