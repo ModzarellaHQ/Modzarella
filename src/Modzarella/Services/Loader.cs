@@ -33,12 +33,6 @@ public static class Loader
         File.WriteAllText(script, s);
         if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(script, File.GetUnixFileMode(script) | UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute);
 
-        var cfg = Path.Combine(dir, "BepInEx", "config", "BepInEx.cfg");
-        var text = File.Exists(cfg) ? File.ReadAllText(cfg) : "";
-        text = text.Contains("[Preloader.Entrypoint]")
-            ? System.Text.RegularExpressions.Regex.Replace(text, @"(?m)^Type = .*$", "Type = Camera")
-            : text + "\n[Preloader.Entrypoint]\nAssembly = UnityEngine.CoreModule.dll\nType = Camera\nMethod = .cctor\n";
-        File.WriteAllText(cfg, text);
     }
 
     public static string Remove(Game game)

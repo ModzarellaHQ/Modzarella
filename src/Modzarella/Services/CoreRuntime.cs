@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 namespace Modzarella;
 
 public static class CoreRuntime
@@ -23,6 +24,21 @@ public static class CoreRuntime
             File.WriteAllBytes(path, m.ToArray());
             changed = true;
         }
+        LateStart(game);
         return changed ? "Modzarella Core installed." : null;
+    }
+
+    // start plugins once the game's camera exists; the earlier default start leaves them silent on Windows
+    static void LateStart(Game game)
+    {
+        var cfg = Path.Combine(game.Dir, "BepInEx", "config", "BepInEx.cfg");
+        Directory.CreateDirectory(Path.GetDirectoryName(cfg)!);
+        var text = File.Exists(cfg) ? File.ReadAllText(cfg) : "";
+        var want = "[Preloader.Entrypoint]\nAssembly = UnityEngine.CoreModule.dll\nType = Camera\nMethod = .cctor\n";
+        if (Regex.IsMatch(text, @"(?m)^Type = Camera\s*$")) return;
+        text = text.Contains("[Preloader.Entrypoint]")
+            ? Regex.Replace(text, @"(?ms)^\[Preloader\.Entrypoint\].*?(?=^\[|\z)", want + "\n")
+            : text + "\n" + want;
+        File.WriteAllText(cfg, text);
     }
 }
