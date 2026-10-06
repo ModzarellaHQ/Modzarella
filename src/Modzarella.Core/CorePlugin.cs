@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Modz
 {
-    [BepInPlugin(GUID, "Modzarella", "1.2.3")]
+    [BepInPlugin(GUID, "Modzarella", "1.3.0")]
     public class CorePlugin : BaseUnityPlugin
     {
         public const string GUID = "modz.core";
@@ -51,6 +51,7 @@ namespace Modz
             gameObject.AddComponent<CameraFeature>().Init(Config);
             gameObject.AddComponent<TweaksFeature>().Init(Config);
             gameObject.AddComponent<LuaEngine>().Init();
+            gameObject.AddComponent<Net>().Init(Config);
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += (_, __) => Body.Prune();
         }
 
@@ -144,7 +145,7 @@ namespace Modz
             GUILayout.BeginHorizontal();
             GUILayout.Label("Modzarella", Theme.TextStyle(15, Theme.TextColor, "left", true), GUILayout.Height(26));
             GUILayout.Space(8);
-            GUILayout.Label(ModCommon.Active ? "mods on" : "mods run in Play Offline", Theme.TextStyle(11, Theme.Dim), GUILayout.Height(26));
+            GUILayout.Label(ModCommon.Active ? "mods on" : Net.Ready ? "online mods on" : "mods run in Play Offline", Theme.TextStyle(11, Theme.Dim), GUILayout.Height(26));
             GUILayout.FlexibleSpace();
             GUI.SetNextControlName("search");
             search = GUILayout.TextField(search, Theme.Field, GUILayout.Width(170));
