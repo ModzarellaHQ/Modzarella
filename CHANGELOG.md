@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3
+
+- The F1 menu is equally see-through on every platform
+
 ## 1.2.2
 
 - Windows and Linux: mods start once the game is running, so the F1 menu and mods work there too
