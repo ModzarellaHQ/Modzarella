@@ -186,7 +186,7 @@ namespace Modz
         private static readonly AccessTools.FieldRef<CameraRig, Transform> Target = AccessTools.FieldRefAccess<CameraRig, Transform>("targetTransform");
         private static readonly Dictionary<CameraRig, Vector3> baseOffset = new Dictionary<CameraRig, Vector3>();
         private static Transform thirdPersonTarget;
-        private static bool fpWasOn;
+        private static bool fpWasOn, snap;
         private static float baseNear = -1f, fovBoost;
 
         private static CameraFeature C => CameraFeature.Instance;
@@ -223,6 +223,12 @@ namespace Modz
                 if (C.FPActive) z = 0.0001f;
             }
             Offset(__instance) = b * z;
+            if (snap && __instance.mainCamera && Target(__instance))
+            {
+                __instance.transform.position = Target(__instance).position;
+                __instance.mainCamera.transform.localPosition = Offset(__instance);
+                snap = false;
+            }
             return true;
         }
 
@@ -269,6 +275,7 @@ namespace Modz
                 Target(rig) = thirdPersonTarget ? thirdPersonTarget : me ? me.spine1.transform : Target(rig);
                 if (baseNear > 0f) rig.mainCamera.nearClipPlane = baseNear;
             }
+            if (on != fpWasOn) snap = true;
             fpWasOn = on;
         }
     }
