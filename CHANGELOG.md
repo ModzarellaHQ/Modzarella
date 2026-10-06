@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.2
+
+- Windows and Linux: mods start once the game is running, so the F1 menu and mods work there too
+- Installed mods show their name and version in the F1 menu
+
 ## 1.2.1
 
 - Renamed mods replace their old version automatically (BMW becomes Sports Cars)
