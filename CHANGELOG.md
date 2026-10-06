@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0
+
+- Online mods (experimental, off by default): in online lobbies where everyone has Modzarella with the same mods, mods run and can sync through the new `net` Lua API
+- Sports Cars shows other players' cars online
+
 ## 1.2.3
 
 - The F1 menu is equally see-through on every platform
