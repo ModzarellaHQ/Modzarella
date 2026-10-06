@@ -92,7 +92,7 @@ public class Catalog(string source, HttpClient http)
             Directory.CreateDirectory(System.IO.Path.GetDirectoryName(to)!);
             await File.WriteAllBytesAsync(to, bytes);
         }
-        await File.WriteAllTextAsync(System.IO.Path.Combine(staging, "mod.json"), JsonSerializer.Serialize(mod, Json));
+        await File.WriteAllTextAsync(System.IO.Path.Combine(staging, "mod.json"), JsonSerializer.Serialize(mod, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
         Remove(game, mod.Id);
         Directory.Move(staging, dir);
         log.Add($"Installed {mod.Name} {mod.Version}");
