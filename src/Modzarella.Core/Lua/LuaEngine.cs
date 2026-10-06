@@ -135,6 +135,20 @@ namespace Modz
             return result;
         }
 
+        // network message from another player: "modid/name" goes to that mod's net.on("name") handlers
+        internal static void NetMessage(string fullName, string sender, string json)
+        {
+            if (!ModCommon.InRound) return;
+            foreach (var (mod, n, fn) in listeners.ToArray())
+                if (n == "net:" + fullName && mod.Running)
+                {
+                    Table data;
+                    try { data = MoonSharp.Interpreter.Serialization.Json.JsonTableConverter.JsonToTable(json, mod.Script); }
+                    catch { continue; }
+                    Invoke(mod, fn, sender, data);
+                }
+        }
+
         static void Each(string fn, params object[] args)
         {
             foreach (var mod in Mods)

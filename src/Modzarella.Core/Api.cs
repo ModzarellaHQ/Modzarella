@@ -45,7 +45,7 @@ namespace Modz
             GameManager.Instance != null && GameManager.Instance.playingOffline && LobbyManager.Instance != null;
 
         public static bool InRound =>
-            Active && StageManager.Instance != null && EntityManager.Instance != null && GameManager.Instance.round != 0;
+            (Active || Net.Ready) && StageManager.Instance != null && EntityManager.Instance != null && GameManager.Instance.round != 0;
 
         public static bool CountingDown => GameManager.Instance != null && GameManager.Instance.GetCountdown() > 0f;
         public static bool Paused => StageManager.Instance != null && StageManager.Instance.isPaused;

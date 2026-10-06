@@ -162,6 +162,18 @@ namespace Modz
             events["emit"] = Fn(s, a => LuaEngine.Emit(a[0].String, a.GetArray(1).Select(x => x.ToObject()).ToArray()));
             g["events"] = events;
 
+            var net = new Table(s);
+            net["ready"] = Fn(s, a => Net.Ready);
+            net["me"] = Fn(s, a => Steamworks.SteamUser.GetSteamID().ToString());
+            net["send"] = Fn(s, a =>
+            {
+                var data = a.Count > 1 && a[1].Type == DataType.Table ? MoonSharp.Interpreter.Serialization.Json.JsonTableConverter.TableToJson(a[1].Table) : "{}";
+                Net.Send(mod.Id + "/" + a[0].String, data, a.Count > 2 && a[2].CastToBool());
+                return null;
+            });
+            net["on"] = Fn(s, a => { LuaEngine.On(mod, "net:" + mod.Id + "/" + a[0].String, a[1]); return null; });
+            g["net"] = net;
+
             var input = new Table(s);
             input["key"] = Fn(s, a => InputAllowed && Keyboard.current != null && Keyboard.current[(Key)Enum.Parse(typeof(Key), a[0].String, true)].isPressed);
             input["key_down"] = Fn(s, a => InputAllowed && Keyboard.current != null && Keyboard.current[(Key)Enum.Parse(typeof(Key), a[0].String, true)].wasPressedThisFrame);

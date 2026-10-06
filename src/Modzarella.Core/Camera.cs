@@ -78,7 +78,7 @@ namespace Modz
             hidden.Clear();
         }
 
-        internal bool On => Enabled.Value && ModCommon.Active;
+        internal bool On => Enabled.Value && (ModCommon.Active || Net.Ready);
         internal bool FPActive => FirstPerson.Value && On && ModCommon.LocalRagdoll();
 
         private void Update()
