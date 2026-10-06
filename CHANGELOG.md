@@ -1,11 +1,8 @@
 # Changelog
 
-## 1.3.1
-
-- F1 menu: only "Modzarella" in the title bar
-
 ## 1.3.0
 
+- F1 menu: only "Modzarella" in the title bar
 - Online mods (experimental, off by default): in online lobbies where everyone has Modzarella with the same mods, mods run and can sync through the new `net` Lua API
 - Sports Cars shows other players' cars online
 
