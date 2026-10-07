@@ -6,11 +6,12 @@
 src/
   Modzarella/          the desktop app (.NET 10)
     Services/          finding the game, BepInEx, the mod catalog, settings
-    Web/               the UI (ui.html) and the local server behind it
+    Web/               the UI (ui.html, ui.css, ui.js) and the local server behind it
     Runtime/           prebuilt Core and MoonSharp DLLs, bundled into the app
   Modzarella.Core/     the in-game part: F1 menu, camera, game tweaks and the Lua engine (MoonSharp, in lib/)
 scripts/package.sh     builds the downloads for each system
 assets/branding/       logo, app icons and banner
+assets/theme.css       colours shared by the app, the F1 menu and the website
 ```
 
 ## The app
