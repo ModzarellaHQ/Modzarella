@@ -5,7 +5,6 @@
 - F1 menu: only "Modzarella" in the title bar
 - Switching between first and third person is instant, slow motion included
 - Online mods (experimental, off by default): in online lobbies where everyone has Modzarella with the same mods, mods run and can sync through the new `net` Lua API
-- Sports Cars shows other players' cars online
 
 ## 1.2.3
 
