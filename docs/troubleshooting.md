@@ -12,9 +12,10 @@ Open **Settings → Game folder** and paste the game's folder. In Steam: **right
 
 ## The game opens without mods
 
-- Start it with **Play** in Modzarella. (On Windows, starting from Steam works too.)
-- Choose **Play Offline**. Mods don't run online.
+- Start it with **Play** in Modzarella. (On Windows and Linux, starting from Steam works too.)
+- Choose **Play Offline**. Online, mods only run with **Online mods** on and the same mods for everyone in the lobby.
 - Try **Settings → Repair mod loader**.
+- Windows: antivirus can block `winhttp.dll` in the game folder. Check **Windows Security → Protection history**, allow it, then repair the loader.
 
 ## The game won't start (macOS)
 
@@ -38,7 +39,7 @@ Steam has to be open and logged in. Modzarella opens Steam if it isn't running. 
 
 ## Crashes or odd behaviour
 
-Turn mods off one at a time to find the cause. If that doesn't help, [open an issue](https://github.com/ModzarellaHQ/Modzarella/issues/new/choose) and attach `BepInEx/LogOutput.log` from the game folder.
+Untick mods one at a time in **Installed** to find the cause. **Settings → Reset mod settings** puts every setting back to its default. If that doesn't help, [open an issue](https://github.com/ModzarellaHQ/Modzarella/issues/new/choose) and attach `BepInEx/LogOutput.log`. **Settings → Game log** opens it.
 
 ## Removing everything
 
