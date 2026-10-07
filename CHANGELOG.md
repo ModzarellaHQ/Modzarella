@@ -2,21 +2,15 @@
 
 ## 1.3.0
 
-- F1 menu: only "Modzarella" in the title bar
-- Switching between first and third person is instant, slow motion included
 - Online mods (experimental, off by default): in online lobbies where everyone has Modzarella with the same mods, mods run and can sync through the new `net` Lua API
+- Switching between first and third person is instant, slow motion included
+- F1 menu: only "Modzarella" in the title bar
 
 ## 1.2.3
 
-- The F1 menu is equally see-through on every platform
-
-## 1.2.2
-
 - Windows and Linux: mods start once the game is running, so the F1 menu and mods work there too
+- The F1 menu is equally see-through on every platform
 - Installed mods show their name and version in the F1 menu
-
-## 1.2.1
-
 - Renamed mods replace their old version automatically
 - Particle effects can be stacked on one object
 
@@ -32,26 +26,15 @@
 
 ## 1.1.4
 
-- Freecam stops cleanly when the map changes, and its key always turns it off
-
-## 1.1.3
-
 - Mods update automatically when the app opens and before playing (can be turned off in Settings)
 - The app tells you when a new version of Modzarella is out
 - Restart map (F6) and next map (F7) shortcuts
 - Settings: open the game and mods folders and the game log, reset mod settings
 - Blood and other marks lie on the ground instead of floating, and always appear
 - Seats use generic upright and reclined poses
+- Freecam stops cleanly when the map changes, and its key always turns it off
 
 ## 1.1.2
-
-- Mods are downloaded from modza.space/modz; existing installs switch over automatically
-
-## 1.1.1
-
-- Mods are downloaded from modza.space/Modz; existing installs switch over automatically
-
-## 1.1.0
 
 - New look for the app, the F1 menu and the website, with colours shared in `assets/theme.css`
 - F1 menu: search, collapsible mods, per-setting reset, slightly see-through
@@ -61,6 +44,7 @@
 - New logo and icons
 - The app window can no longer go fullscreen or maximize
 - The app's local server only answers its own window
+- Mods are downloaded from modza.space/modz; existing installs switch over automatically
 
 ## 1.0.0
 
