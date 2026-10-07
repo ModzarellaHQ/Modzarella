@@ -39,6 +39,7 @@ Modzarella is a mod manager for [Cheese Rolling](https://store.steampowered.com/
 - **Built-in extras:** freecam, mouse look, first person, zoom, endless rounds, frozen bots, slow motion, restart or skip the map
 - **Lua mods:** mods are plain Lua scripts, so making one needs no compiler
 - **Safe installs:** every download is checked before it touches your game
+- **Online mods (experimental):** in lobbies where everyone has the same mods, mods run online too
 - **Cross-platform:** native app for macOS, Windows and Linux
 
 ## Install
@@ -56,11 +57,11 @@ You need Cheese Rolling from Steam, launched at least once.
 
 ## Usage
 
-1. Open Modzarella and switch on the mods you want.
+1. Open Modzarella, find mods in **Browse** and press **Install**.
 2. Press **Play**.
 3. In game, choose **Play Offline** and press **F1** for the mod menu.
 
-Mods only run offline. To play without them, start the game from Steam as usual.
+Mods run in Play Offline. To use them online, turn on **Online mods** in the F1 menu: they then run in lobbies where everyone has the same mods. To play without mods, untick them in **Installed**.
 
 ## Help
 
