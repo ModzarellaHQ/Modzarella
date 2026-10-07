@@ -17,7 +17,7 @@
 
 ## 1.2.1
 
-- Renamed mods replace their old version automatically (BMW becomes Sports Cars)
+- Renamed mods replace their old version automatically
 - Particle effects can be stacked on one object
 
 ## 1.2.0
