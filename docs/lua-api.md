@@ -35,7 +35,7 @@ function update()
 end
 ```
 
-Settings, keys and buttons appear on the mod's page in the F1 menu. Press **Reload** there to rerun `main.lua` after editing it.
+Settings, keys and buttons appear in the mod's section of the F1 menu. Press **Reload** there to rerun `main.lua` after editing it.
 
 ## Building blocks
 
@@ -43,13 +43,13 @@ You rarely start from zero. Core does the hard parts that several mods share, so
 
 | Block | What it handles | Calls | Used by |
 |---|---|---|---|
-| Seats | Puts a body on a seat in an upright or reclined pose, hands on a target, safe to get on and off | `body.seat` | BMW, Rocket Toilet |
-| Vehicles | Registers anything driveable so the camera and other mods react to it | `game.add_vehicle`, `game.vehicles`, `game.set_driver` | BMW, Rocket Toilet, Euphoria |
+| Seats | Puts a body on a seat in an upright or reclined pose, hands on a target, safe to get on and off | `body.seat` | Sports Cars, Rocket Toilet |
+| Vehicles | Registers anything driveable so the camera and other mods react to it | `game.add_vehicle`, `game.vehicles`, `game.set_driver` | Sports Cars, Rocket Toilet, Euphoria |
 | Holding things | Hands grip an object, arms relax, the body faces where you aim | `body.grip`, `body.set_hands_busy`, `body.heading` | Guns |
 | Muscles | Bends limbs toward a direction or point, cheaply on many bodies | `body.align`, `body.reach` | Euphoria, Guns |
 | Wounds and limbs | Marks wounds and turns a limb into a loose piece | `body.mark_wound`, `body.gib` | Euphoria |
-| Models | Loads `.glb` files, finds wheels, scales to size | `model.load`, `model.clone` | BMW, Guns, Rocket Toilet |
-| Camera | Follow targets, over-the-shoulder offset, zoom, first person, viewmodels | `camera.target`, `camera.shift`, `camera.fov`, `camera.hide_arms` | BMW, Guns, Rocket Toilet |
+| Models | Loads `.glb` files, finds wheels, scales to size | `model.load`, `model.clone` | Sports Cars, Guns, Rocket Toilet |
+| Camera | Follow targets, over-the-shoulder offset, zoom, first person, viewmodels | `camera.target`, `camera.shift`, `camera.fov`, `camera.hide_arms` | Sports Cars, Guns, Rocket Toilet |
 | Effects and sound | Particles, decals, materials, positional sound | `fx.*`, `mat.*`, `audio.*` | All |
 | Events | Mods react to each other without depending on each other | `events.on`, `events.emit` | Guns and Euphoria |
 
@@ -79,7 +79,7 @@ Define any of these as global functions. They only run during a round, in Play O
 | `setting.key{ name, default = "T", desc }` | `.down`, `.held`, `.label` |
 | `menu.button(label, fn)` | |
 
-`advanced = true` hides a setting under **More settings**. Key names are Unity key codes: `"T"`, `"Space"`, `"Alpha1"`, `"Mouse1"`, `"F2"`, `"LeftControl + E"`.
+`advanced = true` shows a setting only when **Advanced** is ticked in the F1 menu. Key names are Unity key codes: `"T"`, `"Space"`, `"Alpha1"`, `"Mouse1"`, `"F2"`, `"LeftControl + E"`.
 
 ## Game
 
@@ -206,7 +206,7 @@ events.on("bullet_hit", function(part, point, dir, power) ... end)
 events.emit("bullet_hit", part, point, dir, power)
 ```
 
-Events in use: `bullet_hit(part, point, dir, power)` and `wheels_bloody(rigidbody, point)`. Emitting an event nobody listens to is fine, so mods never need each other installed.
+Events in use: `bullet_hit(part, point, dir, power)`, `explosion(point, radius, power)` and `wheels_bloody(rigidbody, point)`. Emitting an event nobody listens to is fine, so mods never need each other installed.
 
 ## Online
 
