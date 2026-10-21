@@ -202,15 +202,17 @@ namespace Modz
             {
                 string id = System.Text.Encoding.ASCII.GetString(b, pos, 4);
                 int size = BitConverter.ToInt32(b, pos + 4);
+                if (size < 0 || size > b.Length - pos - 8) size = b.Length - pos - 8;
                 if (id == "fmt ")
                 {
+                    if (size < 16) throw new Exception("broken WAV file: " + path);
                     channels = BitConverter.ToInt16(b, pos + 10);
                     rate = BitConverter.ToInt32(b, pos + 12);
                     bits = BitConverter.ToInt16(b, pos + 22);
                 }
                 else if (id == "data")
                 {
-                    if (bits != 16) throw new Exception("only 16-bit PCM WAV is supported: " + path);
+                    if (bits != 16 || channels < 1) throw new Exception("only 16-bit PCM WAV is supported: " + path);
                     int n = size / 2;
                     var d = new float[n];
                     for (int i = 0; i < n; i++) d[i] = BitConverter.ToInt16(b, pos + 8 + i * 2) / 32768f;
