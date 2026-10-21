@@ -101,7 +101,12 @@ async function act(action, id, value) {
 
 async function poll() {
   if (!busy && !document.hidden) {
-    try { setRunning((await (await fetch('/api/status')).json()).running); } catch { }
+    try {
+      const s = await (await fetch('/api/status')).json();
+      setRunning(s.running);
+      $('appUpdate').hidden = !s.appUpdate;
+      if (s.appUpdate) $('appVersion').textContent = s.appUpdate;
+    } catch { }
   }
   setTimeout(poll, 2000);
 }

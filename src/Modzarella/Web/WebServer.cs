@@ -33,6 +33,8 @@ public static class Web
         catch { return null; }
     }
 
+    static (string Version, string Url)? AppUpdate() => appUpdate is { IsCompletedSuccessfully: true } done ? done.Result : null;
+
     static readonly Dictionary<string, (string Resource, string Type)> files = new()
     {
         ["/"] = ("ui.html", "text/html"),
@@ -43,25 +45,30 @@ public static class Web
 
     public static string Start(Settings settings, HttpClient http)
     {
-        var probe = new TcpListener(IPAddress.Loopback, 0);
-        probe.Start();
-        int port = ((IPEndPoint)probe.LocalEndpoint).Port;
-        probe.Stop();
-        var url = $"http://127.0.0.1:{port}/";
-        var listener = new HttpListener();
-        listener.Prefixes.Add(url);
-        listener.Start();
-        _ = Loop(listener, settings, http, $"127.0.0.1:{port}");
-        return url;
+        for (int attempt = 1; ; attempt++)
+        {
+            var probe = new TcpListener(IPAddress.Loopback, 0);
+            probe.Start();
+            int port = ((IPEndPoint)probe.LocalEndpoint).Port;
+            probe.Stop();
+            var url = $"http://127.0.0.1:{port}/";
+            var listener = new HttpListener();
+            listener.Prefixes.Add(url);
+            try { listener.Start(); }
+            catch (HttpListenerException) when (attempt < 5) { listener.Close(); continue; }
+            _ = Loop(listener, settings, http, $"127.0.0.1:{port}");
+            appUpdate = LatestApp(http);
+            return url;
+        }
     }
 
     static async Task Loop(HttpListener listener, Settings settings, HttpClient http, string host)
     {
         var cache = files.Values.ToDictionary(f => f.Resource, f => Read(f.Resource));
-        while (true)
+        while (listener.IsListening)
         {
-            var ctx = await listener.GetContextAsync();
-            _ = Handle(ctx, settings, http, host, cache);
+            try { _ = Handle(await listener.GetContextAsync(), settings, http, host, cache); }
+            catch (HttpListenerException) { }
         }
     }
 
@@ -81,6 +88,7 @@ public static class Web
         res.Headers["X-Content-Type-Options"] = "nosniff";
         res.Headers["Referrer-Policy"] = "no-referrer";
         res.Headers["Cache-Control"] = "no-store";
+        res.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
         try
         {
             if (req.Headers["Host"] != host) { await Send(res, 403, new { error = "forbidden" }); return; }
@@ -92,7 +100,7 @@ public static class Web
                 return;
             }
             if (path == "/api/state" && req.HttpMethod == "GET") { await Send(res, 200, await State(settings, http)); return; }
-            if (path == "/api/status" && req.HttpMethod == "GET") { await Send(res, 200, new { running = Game.Running() }); return; }
+            if (path == "/api/status" && req.HttpMethod == "GET") { await Send(res, 200, new { running = Game.Running(), appUpdate = AppUpdate()?.Version }); return; }
             if (path == "/api/do")
             {
                 var origin = req.Headers["Origin"];
@@ -101,7 +109,10 @@ public static class Web
                     await Send(res, 403, new { error = "forbidden" });
                     return;
                 }
-                var r = (await JsonSerializer.DeserializeAsync<Request>(req.InputStream, Json))!;
+                Request? r;
+                try { r = await JsonSerializer.DeserializeAsync<Request>(req.InputStream, Json); }
+                catch (JsonException) { r = null; }
+                if (r?.Action == null) { await Send(res, 400, new { error = "bad request" }); return; }
                 await busy.WaitAsync();
                 try { await Send(res, 200, new { log = await Do(settings, http, r) }); }
                 finally { busy.Release(); }
@@ -131,8 +142,8 @@ public static class Web
         res.StatusCode = status;
         res.ContentType = type + "; charset=utf-8";
         res.ContentLength64 = body.Length;
-        await res.OutputStream.WriteAsync(body);
-        res.Close();
+        try { await res.OutputStream.WriteAsync(body); }
+        finally { res.Close(); }
     }
 
     static async Task<object> State(Settings settings, HttpClient http)
@@ -142,8 +153,7 @@ public static class Web
         string? error = null;
         try { mods = await new Catalog(settings.Source, http).Mods(); }
         catch (Exception e) { error = $"Can't read the mod source: {e.Message}"; }
-        appUpdate ??= LatestApp(http);
-        var app = await appUpdate;
+        var app = AppUpdate();
         return new
         {
             source = settings.Source,
