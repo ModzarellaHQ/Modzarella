@@ -77,7 +77,7 @@ namespace Modz
             var lobby = Lobby();
             if (!Ready || lobby == CSteamID.Nil) return;
             var bytes = Encoding.UTF8.GetBytes(name + "\n" + payload);
-            if (bytes.Length > 1100 && !reliable) return;
+            if (bytes.Length > (reliable ? 16384 : 1100)) return;
             var me = SteamUser.GetSteamID();
             var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
             try
@@ -94,19 +94,36 @@ namespace Modz
             finally { handle.Free(); }
         }
 
+        static bool Shallow(string json)
+        {
+            int depth = 0;
+            bool quoted = false;
+            for (int i = 0; i < json.Length; i++)
+            {
+                char c = json[i];
+                if (quoted) { if (c == '\\') i++; else if (c == '"') quoted = false; }
+                else if (c == '"') quoted = true;
+                else if ((c == '{' || c == '[') && ++depth > 32) return false;
+                else if (c == '}' || c == ']') depth--;
+            }
+            return true;
+        }
+
         static void Receive()
         {
             int n = SteamNetworkingMessages.ReceiveMessagesOnChannel(Channel, inbox, inbox.Length);
+            var members = n > 0 ? new HashSet<CSteamID>(Members(Lobby())) : null;
             for (int i = 0; i < n; i++)
             {
                 try
                 {
                     var msg = SteamNetworkingMessage_t.FromIntPtr(inbox[i]);
+                    if (msg.m_cbSize > 16384 || !members.Contains(msg.m_identityPeer.GetSteamID())) continue;
                     var data = new byte[msg.m_cbSize];
                     Marshal.Copy(msg.m_pData, data, 0, msg.m_cbSize);
                     var text = Encoding.UTF8.GetString(data);
                     int split = text.IndexOf('\n');
-                    if (split > 0) LuaEngine.NetMessage(text.Substring(0, split), msg.m_identityPeer.GetSteamID().ToString(), text.Substring(split + 1));
+                    if (split > 0 && Shallow(text)) LuaEngine.NetMessage(text.Substring(0, split), msg.m_identityPeer.GetSteamID().ToString(), text.Substring(split + 1));
                 }
                 catch (Exception e) { CorePlugin.Log.LogWarning("[Net] " + e.Message); }
                 finally { SteamNetworkingMessage_t.Release(inbox[i]); }
