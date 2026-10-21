@@ -119,6 +119,10 @@ document.addEventListener('change', e => {
   else if (c.id === 'autoUpdate') act('autoupdate', null, String(c.checked));
 });
 $('search').addEventListener('input', render);
+if (location.search === '?mac') {
+  document.documentElement.classList.add('mac');
+  document.querySelector('header').addEventListener('mousedown', e => { if (e.button === 0 && !e.target.closest('button')) window.external.sendMessage('drag'); });
+}
 
 if (tabs.includes(location.hash.slice(1))) tab(location.hash.slice(1));
 load().finally(poll);

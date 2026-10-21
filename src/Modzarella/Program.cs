@@ -32,7 +32,8 @@ static class Program
                     .SetDevToolsEnabled(false)
                     .SetContextMenuEnabled(false)
                     .RegisterWindowCreatedHandler((w, _) => NativeWindow.Apply((PhotinoWindow)w!))
-                    .Load(new Uri(url))
+                    .RegisterWebMessageReceivedHandler((_, m) => { if (m == "drag" && OperatingSystem.IsMacOS()) NativeWindow.Drag(); })
+                    .Load(new Uri(OperatingSystem.IsMacOS() ? url + "?mac" : url))
                     .WaitForClose();
                 return 0;
             }

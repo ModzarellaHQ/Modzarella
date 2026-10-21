@@ -15,6 +15,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 var
 
 header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line) }
 header strong { font-size: 15px }
+.mac header { height: 49px; padding-left: 88px }
 .version { flex: 1; color: var(--dim); font: 11px var(--mono) }
 .play { background: var(--accent); color: var(--on-accent); font-weight: 600; padding: 8px 18px; min-width: 96px }
 .play:hover { background: var(--accent-hover) }
