@@ -47,14 +47,18 @@ public class Catalog(string source, HttpClient http)
         return mods;
     }
 
-    static Mod[] Parse(byte[] json) => JsonSerializer.Deserialize<Index>(json, Json)!.Mods.Where(m => ValidId(m.Id)).ToArray();
+    static Mod[] Parse(byte[] json) => JsonSerializer.Deserialize<Index>(json, Json)!.Mods
+        .Where(m => ValidId(m.Id) && m.Files != null)
+        .Select(m => m.Dependencies == null ? m with { Dependencies = [] } : m).ToArray();
 
     public static Mod? Installed(Game game, string id)
     {
         foreach (var root in new[] { game.Plugins, game.Disabled })
         {
             var f = System.IO.Path.Combine(root, id, "mod.json");
-            if (File.Exists(f)) return JsonSerializer.Deserialize<Mod>(File.ReadAllText(f), Json);
+            if (File.Exists(f))
+                try { return JsonSerializer.Deserialize<Mod>(File.ReadAllText(f), Json); }
+                catch (JsonException) { return null; }
         }
         return null;
     }
