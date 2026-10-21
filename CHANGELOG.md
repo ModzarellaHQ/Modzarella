@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.1
+
+- Lighter: downloads are about 75% smaller, and the app uses less memory
+- An install that fails halfway no longer leaves a second copy of the mod running in game
+- A renamed mod that was turned off stays off after it updates
+- A broken mod list or mod file no longer stops the app from showing your mods
+- The title bar no longer repeats that Cheese Rolling wasn't found
+
 ## 1.3.0
 
 - Online mods (experimental, off by default): in online lobbies where everyone has Modzarella with the same mods, mods run and can sync through the new `net` Lua API
