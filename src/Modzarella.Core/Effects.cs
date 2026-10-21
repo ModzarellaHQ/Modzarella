@@ -102,6 +102,8 @@ namespace Modz
 
     public static class Particles
     {
+        static Material blob;
+
         static ParticleSystem.MinMaxCurve Curve(DynValue v, float fallback)
         {
             if (v.Type == DataType.Number) return new ParticleSystem.MinMaxCurve((float)v.Number);
@@ -169,7 +171,8 @@ namespace Modz
                 c.color = g;
             }
             var rend = go.GetComponent<ParticleSystemRenderer>();
-            rend.sharedMaterial = o.Get("material").ToObject<Material>() ?? ModCommon.UnlitMaterial(ModCommon.BlobTexture(32));
+            if (!blob) blob = ModCommon.UnlitMaterial(ModCommon.BlobTexture(32));
+            rend.sharedMaterial = o.Get("material").ToObject<Material>() ?? blob;
             var stretch = o.Get("stretch");
             if (!stretch.IsNil())
             {

@@ -448,7 +448,7 @@ namespace Modz
                     }
                     else bytes = ReadUri(img["uri"].ToString());
                     t = new Texture2D(2, 2, TextureFormat.RGBA32, true);
-                    if (!t.LoadImage(bytes, false)) return null;
+                    if (!t.LoadImage(bytes, false)) { UnityEngine.Object.Destroy(t); return null; }
                     if (t.width > 1024 || t.height > 1024) t = Downscale(t, 1024);
                     if (t.width % 4 == 0 && t.height % 4 == 0) t.Compress(true);
                     t.Apply(false, true);

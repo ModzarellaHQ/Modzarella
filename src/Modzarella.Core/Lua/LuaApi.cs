@@ -288,7 +288,8 @@ namespace Modz
                 var holder = new GameObject("Model " + Path.GetFileName(path));
                 holder.SetActive(false);
                 UnityEngine.Object.DontDestroyOnLoad(holder);
-                return models[path] = GlbLoader.Load(path, Arg(a, 1, 1f), 0f, holder.transform);
+                try { return models[path] = GlbLoader.Load(path, Arg(a, 1, 1f), 0f, holder.transform); }
+                catch { UnityEngine.Object.Destroy(holder); throw; }
             });
             model["clone"] = Fn(s, a =>
             {
