@@ -36,7 +36,7 @@ static class Program
                 return 0;
             }
             catch (Exception e) { Console.Error.WriteLine($"No app window ({e.Message}), using the browser."); }
-        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
         Thread.Sleep(Timeout.Infinite);
         return 0;
     }

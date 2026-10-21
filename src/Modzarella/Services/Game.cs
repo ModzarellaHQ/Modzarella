@@ -52,21 +52,21 @@ public record Game(string Dir, Platform Platform)
         }
     }
 
-    static Process[] Processes() => Process.GetProcessesByName("CheeseRolling");
+    static bool Any(string name) { var p = Process.GetProcessesByName(name); foreach (var x in p) x.Dispose(); return p.Length > 0; }
 
-    public static bool Running() { var p = Processes(); foreach (var x in p) x.Dispose(); return p.Length > 0; }
+    public static bool Running() => Any("CheeseRolling");
 
     // asks the game to quit, then forces it if it is still running a few seconds later
     public static string Stop()
     {
-        var procs = Processes();
+        var procs = Process.GetProcessesByName("CheeseRolling");
         if (procs.Length == 0) return "The game isn't running.";
         foreach (var p in procs)
         {
             try
             {
                 if (OperatingSystem.IsWindows()) p.CloseMainWindow();
-                else Process.Start("kill", ["-TERM", p.Id.ToString()])?.WaitForExit();
+                else using (var kill = Process.Start("kill", ["-TERM", p.Id.ToString()])) kill.WaitForExit();
                 if (!p.WaitForExit(5000)) p.Kill();
             }
             catch (InvalidOperationException) { }
@@ -79,18 +79,18 @@ public record Game(string Dir, Platform Platform)
     {
         if (Platform == Platform.Mac)
         {
-            if (Process.GetProcessesByName("steam_osx").Length == 0)
+            if (!Any("steam_osx"))
             {
-                Process.Start("open", "-a Steam");
+                Process.Start("open", "-a Steam").Dispose();
                 return "Steam isn't running, so it's starting now. Press Play again once Steam is open.";
             }
             var psi = new ProcessStartInfo("/bin/sh", ["-c", "nohup ./run_bepinex.sh >/dev/null 2>&1 &"]) { WorkingDirectory = Dir, UseShellExecute = false };
             psi.Environment["SteamAppId"] = SteamAppId.ToString();
             psi.Environment["SteamGameId"] = SteamAppId.ToString();
-            Process.Start(psi);
+            Process.Start(psi)?.Dispose();
             return "Started with mods. Steam must be running.";
         }
-        Process.Start(new ProcessStartInfo($"steam://rungameid/{SteamAppId}") { UseShellExecute = true });
+        Process.Start(new ProcessStartInfo($"steam://rungameid/{SteamAppId}") { UseShellExecute = true })?.Dispose();
         return Platform == Platform.Proton
             ? "Started through Steam. Proton needs this once in Steam → Properties → Launch Options: WINEDLLOVERRIDES=\"winhttp=n,b\" %command%"
             : "Started through Steam.";

@@ -166,13 +166,13 @@ public static class Web
         if (r.Action == "release")
         {
             if ((await (appUpdate ??= LatestApp(http))) is not { } rel) return ["You have the latest Modzarella."];
-            Process.Start(new ProcessStartInfo(rel.Url) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(rel.Url) { UseShellExecute = true })?.Dispose();
             return [$"Opened the Modzarella {rel.Version} download page."];
         }
         if (r.Action == "link")
         {
             if (r.Value == null || !links.TryGetValue(r.Value, out var url)) throw new Exception("Unknown link");
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
             return [$"Opened {url}"];
         }
         if (r.Action == "stop") return [Game.Stop()];
@@ -197,7 +197,7 @@ public static class Web
             case "open":
                 var path = r.Value switch { "game" => game.Dir, "mods" => game.Plugins, "log" => game.Log, _ => throw new Exception("Unknown folder") };
                 if (!File.Exists(path) && !Directory.Exists(path)) return [$"{Pretty(path)} doesn't exist yet."];
-                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
                 return [$"Opened {Pretty(path)}"];
             case "enable": return [Catalog.SetEnabled(game, r.Id!, true)];
             case "disable": return [Catalog.SetEnabled(game, r.Id!, false)];
