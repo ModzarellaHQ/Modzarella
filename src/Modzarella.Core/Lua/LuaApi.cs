@@ -61,12 +61,11 @@ namespace Modz
 
         static Type FindType(string name)
         {
-            if (types.TryGetValue(name, out var t)) return t;
-            t = AppDomain.CurrentDomain.GetAssemblies()
+            if (!types.TryGetValue(name, out var t)) types[name] = t = AppDomain.CurrentDomain.GetAssemblies()
                 .Select(asm => { try { return asm.GetTypes(); } catch { return new Type[0]; } })
                 .SelectMany(x => x)
                 .FirstOrDefault(x => x.Name == name && typeof(Component).IsAssignableFrom(x));
-            return types[name] = t ?? throw new ScriptRuntimeException($"unknown component type '{name}'");
+            return t ?? throw new ScriptRuntimeException($"unknown component type '{name}'");
         }
 
         static string ModPath(LuaMod mod, string rel)

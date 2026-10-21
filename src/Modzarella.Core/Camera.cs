@@ -53,6 +53,13 @@ namespace Modz
 
         private readonly List<KeyValuePair<Transform, Vector3>> hidden = new List<KeyValuePair<Transform, Vector3>>();
 
+        void Hide(Component part)
+        {
+            if (!part || part.transform.localScale.x < 0.01f) return;
+            hidden.Add(new KeyValuePair<Transform, Vector3>(part.transform, part.transform.localScale));
+            part.transform.localScale = Vector3.one * 0.001f;
+        }
+
         // skinning runs before culling: shrink in LateUpdate, restore after rendering
         private void OnEnable() => Camera.onPostRender += ShowOwnHead;
         private void OnDisable() { Camera.onPostRender -= ShowOwnHead; ShowOwnHead(null); }
@@ -63,13 +70,8 @@ namespace Modz
             ShowOwnHead(null);
             if (!FPActive || Flying || !StageManager.Instance) return;
             var me = ModCommon.LocalRagdoll();
-            var parts = HideArms ? new[] { me.head, me.spine2, me.upperArmLeft, me.lowerArmLeft, me.handLeft, me.upperArmRight, me.lowerArmRight, me.handRight } : new[] { me.head, me.spine2 };
-            foreach (var part in parts)
-            {
-                if (!part || part.transform.localScale.x < 0.01f) continue;
-                hidden.Add(new KeyValuePair<Transform, Vector3>(part.transform, part.transform.localScale));
-                part.transform.localScale = Vector3.one * 0.001f;
-            }
+            Hide(me.head); Hide(me.spine2);
+            if (HideArms) { Hide(me.upperArmLeft); Hide(me.lowerArmLeft); Hide(me.handLeft); Hide(me.upperArmRight); Hide(me.lowerArmRight); Hide(me.handRight); }
         }
 
         private void ShowOwnHead(Camera cam)

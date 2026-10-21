@@ -49,7 +49,8 @@ namespace Modz
 
         public static bool CountingDown => GameManager.Instance != null && GameManager.Instance.GetCountdown() > 0f;
         public static bool Paused => StageManager.Instance != null && StageManager.Instance.isPaused;
-        public static int GroundMask => LayerMask.GetMask("Ground", "Obstacle");
+        static int groundMask;
+        public static int GroundMask => groundMask != 0 ? groundMask : groundMask = LayerMask.GetMask("Ground", "Obstacle");
 
         public static ActiveRagdoll LocalRagdoll()
         {

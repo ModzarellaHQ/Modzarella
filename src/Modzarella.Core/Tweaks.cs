@@ -72,18 +72,27 @@ namespace Modz
             Application.targetFrameRate = VSyncOff.Value && FpsCap.Value > 0 ? FpsCap.Value : -1;
         }
 
+        int badgeFlags;
+        string badge;
+        float badgeWidth;
+
         private void OnGUI()
         {
             if (Event.current.type != EventType.Repaint || !On || !ModCommon.InRound) return;
-            var tags = new List<string>();
-            if (Endless.Value) tags.Add("Endless round");
-            if (FreezeBots.Value) tags.Add("Bots frozen");
-            if (SlowMo.Value) tags.Add("Slow motion");
-            if (CameraFeature.Flying) tags.Add("Freecam");
-            if (tags.Count == 0) return;
-            string text = string.Join("  ·  ", tags.ToArray());
-            float w = Theme.TextStyle(11, Theme.Dim, "center").CalcSize(new GUIContent(text)).x + 20;
-            Theme.Badge(new Rect(12, 12, w, 22), text);
+            int flags = (Endless.Value ? 1 : 0) | (FreezeBots.Value ? 2 : 0) | (SlowMo.Value ? 4 : 0) | (CameraFeature.Flying ? 8 : 0);
+            if (flags == 0) return;
+            if (flags != badgeFlags)
+            {
+                var tags = new List<string>();
+                if (Endless.Value) tags.Add("Endless round");
+                if (FreezeBots.Value) tags.Add("Bots frozen");
+                if (SlowMo.Value) tags.Add("Slow motion");
+                if (CameraFeature.Flying) tags.Add("Freecam");
+                badgeFlags = flags;
+                badge = string.Join("  ·  ", tags.ToArray());
+                badgeWidth = Theme.TextStyle(11, Theme.Dim, "center").CalcSize(new GUIContent(badge)).x + 20;
+            }
+            Theme.Badge(new Rect(12, 12, badgeWidth, 22), badge);
         }
     }
 

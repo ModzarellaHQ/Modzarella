@@ -16,7 +16,7 @@ namespace Modz
             OnAccent = Var("on-accent"), Bad = Var("bad");
 
         static Font sans, mono;
-        static readonly Dictionary<string, GUIStyle> textStyles = new Dictionary<string, GUIStyle>();
+        static readonly Dictionary<int, GUIStyle> textStyles = new Dictionary<int, GUIStyle>();
         static readonly Dictionary<Color, Texture2D> solids = new Dictionary<Color, Texture2D>();
 
         static Dictionary<string, string> Load()
@@ -55,7 +55,7 @@ namespace Modz
 
         public static GUIStyle TextStyle(int size, Color color, string align = "left", bool bold = false, bool wrap = false, bool monospace = false)
         {
-            string key = $"{size}|{align}|{bold}|{wrap}|{monospace}";
+            int key = size << 5 | (align == "center" ? 1 : align == "right" ? 2 : 0) << 3 | (bold ? 4 : 0) | (wrap ? 2 : 0) | (monospace ? 1 : 0);
             if (!textStyles.TryGetValue(key, out var st))
                 textStyles[key] = st = new GUIStyle
                 {
