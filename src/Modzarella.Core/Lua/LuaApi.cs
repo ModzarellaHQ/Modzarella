@@ -428,7 +428,9 @@ namespace Modz
         static CollisionRelay Relay(LuaMod mod, DynValue target)
         {
             var go = target.ToObject() is Component c ? c.gameObject : target.ToObject<GameObject>();
-            var relay = go.GetComponent<CollisionRelay>() ?? go.AddComponent<CollisionRelay>();
+            foreach (var r in go.GetComponents<CollisionRelay>())
+                if (r.Mod == mod) return r;
+            var relay = go.AddComponent<CollisionRelay>();
             relay.Mod = mod;
             return relay;
         }

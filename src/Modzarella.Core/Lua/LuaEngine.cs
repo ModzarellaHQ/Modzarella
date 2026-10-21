@@ -202,7 +202,7 @@ namespace Modz
         internal LuaMod Mod;
         internal DynValue OnHit, OnStay;
 
-        bool Current(DynValue fn) => fn != null && Mod.Running && fn.Function.OwnerScript == Mod.Script;
+        bool Current(DynValue fn) => fn != null && fn.Type == DataType.Function && Mod.Running && fn.Function.OwnerScript == Mod.Script;
         void OnCollisionEnter(Collision c) { if (Current(OnHit)) LuaEngine.Invoke(Mod, OnHit, c); }
         void OnCollisionStay(Collision c) { if (Current(OnStay)) LuaEngine.Invoke(Mod, OnStay, c); }
     }
