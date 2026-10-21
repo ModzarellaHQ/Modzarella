@@ -80,20 +80,29 @@ public class Catalog(string source, HttpClient http)
 
         var dir = System.IO.Path.Combine(game.Plugins, mod.Id);
         var old = Directory.Exists(dir) ? dir : System.IO.Path.Combine(game.Disabled, mod.Id);
-        var staging = dir + ".new";
+        var staging = System.IO.Path.Combine(game.Staging, mod.Id);
         if (Directory.Exists(staging)) Directory.Delete(staging, true);
-        foreach (var f in mod.Files)
+        try
         {
-            var to = Inside(staging, f.Target);
-            var have = Inside(old, f.Target);
-            var local = File.Exists(have) ? await File.ReadAllBytesAsync(have) : null;
-            var bytes = local != null && Convert.ToHexStringLower(SHA256.HashData(local)) == f.Sha256 ? local : await Fetch(f.Path);
-            if (Convert.ToHexStringLower(SHA256.HashData(bytes)) != f.Sha256) throw new Exception($"Checksum mismatch: {f.Path}");
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(to)!);
-            await File.WriteAllBytesAsync(to, bytes);
+            foreach (var f in mod.Files)
+            {
+                var to = Inside(staging, f.Target);
+                var have = Inside(old, f.Target);
+                var local = File.Exists(have) ? await File.ReadAllBytesAsync(have) : null;
+                var bytes = local != null && Convert.ToHexStringLower(SHA256.HashData(local)) == f.Sha256 ? local : await Fetch(f.Path);
+                if (Convert.ToHexStringLower(SHA256.HashData(bytes)) != f.Sha256) throw new Exception($"Checksum mismatch: {f.Path}");
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(to)!);
+                await File.WriteAllBytesAsync(to, bytes);
+            }
+            await File.WriteAllTextAsync(System.IO.Path.Combine(staging, "mod.json"), JsonSerializer.Serialize(mod, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
         }
-        await File.WriteAllTextAsync(System.IO.Path.Combine(staging, "mod.json"), JsonSerializer.Serialize(mod, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+        catch
+        {
+            if (Directory.Exists(staging)) Directory.Delete(staging, true);
+            throw;
+        }
         Remove(game, mod.Id);
+        Directory.CreateDirectory(game.Plugins);
         Directory.Move(staging, dir);
         log.Add($"Installed {mod.Name} {mod.Version}");
         return log;

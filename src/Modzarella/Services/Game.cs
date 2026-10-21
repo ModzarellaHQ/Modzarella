@@ -13,6 +13,7 @@ public record Game(string Dir, Platform Platform)
 
     public string Plugins => Path.Combine(Dir, "BepInEx", "plugins", "Modz");
     public string Disabled => Path.Combine(Dir, "BepInEx", "plugins-disabled", "Modz");
+    public string Staging => Path.Combine(Dir, "BepInEx", "modz-staging");
     public string Config => Path.Combine(Dir, "BepInEx", "config");
     public string Log => Path.Combine(Dir, "BepInEx", "LogOutput.log");
     public bool LoaderInstalled => File.Exists(Path.Combine(Dir, "BepInEx", "core", "BepInEx.dll"));
