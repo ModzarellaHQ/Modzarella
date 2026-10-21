@@ -142,8 +142,10 @@ public class Catalog(string source, HttpClient http)
         foreach (var m in all.Where(m => m.Replaces != null && StateOf(game, m) == State.NotInstalled))
             foreach (var old in m.Replaces!.Where(o => ValidId(o) && Installed(game, o) != null))
             {
+                bool wasOff = Directory.Exists(System.IO.Path.Combine(game.Disabled, old));
                 log.AddRange(await Install(game, m.Id, all));
                 log.Add(Remove(game, old));
+                if (wasOff) SetEnabled(game, m.Id, false);
             }
         foreach (var m in all.Where(m => StateOf(game, m) == State.UpdateAvailable))
         {
