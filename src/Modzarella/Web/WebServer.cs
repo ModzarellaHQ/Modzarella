@@ -152,8 +152,12 @@ public static class Web
             running = Game.Running(),
             appUpdate = app == null ? null : new { version = app.Value.Version },
             gameDir = settings.GameDir,
-            game = game == null ? null : new { Dir = Pretty(game.Dir), platform = game.Platform.ToString(), loader = game.LoaderInstalled },
-            mods = mods.Select(m => new { mod = m, state = game == null ? "NotInstalled" : Catalog.StateOf(game, m).ToString() }),
+            game = game == null ? null : new { dir = Pretty(game.Dir), platform = game.Platform.ToString(), loader = game.LoaderInstalled },
+            mods = mods.Select(m => new
+            {
+                mod = new { m.Id, m.Name, m.Version, m.Author, m.Description },
+                state = game == null ? "NotInstalled" : Catalog.StateOf(game, m).ToString(),
+            }),
             error,
         };
     }
