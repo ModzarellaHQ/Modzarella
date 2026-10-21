@@ -3,3 +3,7 @@ obj/
 build/
 dist/
 .DS_Store
+.vs/
+.idea/
+.vscode/
+*.user
