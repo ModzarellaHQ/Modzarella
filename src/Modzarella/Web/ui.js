@@ -52,7 +52,6 @@ async function load() {
   $('error').hidden = !problem;
   if (!s.game) tab('settings');
   $('version').textContent = $('aboutVersion').textContent = s.version;
-  $('game').textContent = s.game?.dir ?? '';
   $('loader').textContent = s.game?.loader ? 'Repair mod loader' : 'Install mod loader';
   $('updateAll').hidden = !s.mods.some(m => m.state === 'UpdateAvailable');
   $('autoUpdate').checked = s.autoUpdate;
