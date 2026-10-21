@@ -24,6 +24,7 @@ static class Program
             try
             {
                 new PhotinoWindow()
+                    .SetLogVerbosity(0)
                     .SetTitle("Modzarella")
                     .SetSize(1040, 760)
                     .SetMinSize(560, 480)
