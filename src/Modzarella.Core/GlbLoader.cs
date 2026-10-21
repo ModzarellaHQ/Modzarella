@@ -297,7 +297,10 @@ namespace Modz
             private byte[] ReadUri(string uri)
             {
                 if (uri.StartsWith("data:")) return Convert.FromBase64String(uri.Substring(uri.IndexOf(',') + 1));
-                return File.ReadAllBytes(Path.Combine(dir, Uri.UnescapeDataString(uri)));
+                var root = Path.GetFullPath(dir).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                var full = Path.GetFullPath(Path.Combine(dir, Uri.UnescapeDataString(uri)));
+                if (!full.StartsWith(root, StringComparison.Ordinal)) throw new Exception("model files must stay inside the mod folder: " + uri);
+                return File.ReadAllBytes(full);
             }
 
             public float[] ReadVec(int accessor, int comps)
