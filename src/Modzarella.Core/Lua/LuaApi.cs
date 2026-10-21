@@ -64,7 +64,7 @@ namespace Modz
             if (!types.TryGetValue(name, out var t)) types[name] = t = AppDomain.CurrentDomain.GetAssemblies()
                 .Select(asm => { try { return asm.GetTypes(); } catch { return new Type[0]; } })
                 .SelectMany(x => x)
-                .FirstOrDefault(x => x.Name == name && typeof(Component).IsAssignableFrom(x));
+                .FirstOrDefault(x => x.Name == name && typeof(Component).IsAssignableFrom(x) && Sandbox.Allowed(x));
             return t ?? throw new ScriptRuntimeException($"unknown component type '{name}'");
         }
 

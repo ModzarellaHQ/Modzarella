@@ -36,7 +36,7 @@ namespace Modz
         public void Init()
         {
             Instance = this;
-            UserData.RegistrationPolicy = MoonSharp.Interpreter.Interop.InteropRegistrationPolicy.Automatic;
+            UserData.RegistrationPolicy = new Sandbox();
             UserData.RegisterType(typeof(Vector3), new FastVector3());
             UserData.RegisterType(typeof(Quaternion), new FastQuaternion());
             Script.DefaultOptions.DebugPrint = s => CorePlugin.Log.LogInfo(s);
