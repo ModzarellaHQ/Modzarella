@@ -6,6 +6,12 @@
 - An install that fails halfway no longer leaves a second copy of the mod running in game
 - A renamed mod that was turned off stays off after it updates
 - A broken mod list or mod file no longer stops the app from showing your mods
+- A mod with a broken mod.json no longer stops the other mods from loading
+- Big 3D models load much faster
+- A broken sound file no longer freezes the game
+- Lua: `events.emit` can pass tables between mods, and `physics.on_hit` works for several mods on one object
+- F1 menu: typing in search no longer causes layout errors
+- Particles, models and the in-game overlay use less memory
 
 ## 1.3.0
 
