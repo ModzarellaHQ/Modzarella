@@ -121,4 +121,4 @@ document.addEventListener('change', e => {
 $('search').addEventListener('input', render);
 
 if (tabs.includes(location.hash.slice(1))) tab(location.hash.slice(1));
-load().then(poll);
+load().finally(poll);
