@@ -134,10 +134,31 @@ namespace Modz
             foreach (var (mod, n, fn) in listeners.ToArray())
                 if (n == name && mod.Running)
                 {
-                    var r = Invoke(mod, fn, args);
+                    var r = Invoke(mod, fn, args.Select(x => x is DynValue d ? Copy(d, mod.Script) : x).ToArray());
                     if (result.IsNil()) result = r;
                 }
             return result;
+        }
+
+        public static DynValue Copy(DynValue v, Script to, int depth = 0)
+        {
+            switch (v.Type)
+            {
+                case DataType.Table:
+                    if (v.Table.OwnerScript == to) return v;
+                    var t = new Table(to);
+                    if (depth < 16)
+                        foreach (var p in v.Table.Pairs)
+                        {
+                            var k = Copy(p.Key, to, depth + 1);
+                            if (!k.IsNil()) t.Set(k, Copy(p.Value, to, depth + 1));
+                        }
+                    return DynValue.NewTable(t);
+                case DataType.Tuple: return v.Tuple.Length > 0 ? Copy(v.Tuple[0], to, depth) : DynValue.Nil;
+                case DataType.Function: case DataType.ClrFunction: case DataType.Thread: return DynValue.Nil;
+                case DataType.UserData: return v.UserData.Object == null ? DynValue.Nil : UserData.Create(v.UserData.Object);
+                default: return v;
+            }
         }
 
         // network message from another player: "modid/name" goes to that mod's net.on("name") handlers

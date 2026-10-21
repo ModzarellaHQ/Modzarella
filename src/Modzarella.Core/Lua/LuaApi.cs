@@ -159,7 +159,7 @@ namespace Modz
 
             var events = new Table(s);
             events["on"] = Fn(s, a => { LuaEngine.On(mod, a[0].String, a[1]); return null; });
-            events["emit"] = Fn(s, a => LuaEngine.Emit(a[0].String, a.GetArray(1).Select(x => x.ToObject()).ToArray()));
+            events["emit"] = Fn(s, a => LuaEngine.Copy(LuaEngine.Emit(a[0].String, a.GetArray(1).Cast<object>().ToArray()), s));
             g["events"] = events;
 
             var net = new Table(s);
