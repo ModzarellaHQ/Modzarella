@@ -22,7 +22,9 @@ namespace Modz
         bool menuOpen, advanced;
         Rect window;
         Vector2 scroll;
-        string search = "";
+        string search = "", filter = "";
+        bool showAdvanced;
+        static readonly GUIStyle pageBody = new GUIStyle { padding = new RectOffset(14, 14, 6, 10) };
         readonly HashSet<string> expanded = new HashSet<string> { "Modzarella" };
         ConfigEntryBase rebinding;
         readonly Dictionary<ConfigEntryBase, string> numText = new Dictionary<ConfigEntryBase, string>();
@@ -138,6 +140,7 @@ namespace Modz
 
         void DrawWindow(int id)
         {
+            if (Event.current.type == EventType.Layout) { filter = search; showAdvanced = advanced; }
             float w = window.width, h = window.height;
             Theme.Panel(new Rect(0, 0, w, h));
 
@@ -169,12 +172,12 @@ namespace Modz
 
         void DrawPage(Page p)
         {
-            var entries = p.Config.Where(kv => kv.Key.Section != "General" && (advanced || !IsAdvanced(kv.Value) || search.Length > 0)).ToList();
-            bool searching = search.Length > 0;
+            var entries = p.Config.Where(kv => kv.Key.Section != "General" && (showAdvanced || !IsAdvanced(kv.Value) || filter.Length > 0)).ToList();
+            bool searching = filter.Length > 0;
             if (searching)
             {
-                bool nameHit = p.Name.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
-                if (!nameHit) entries = entries.Where(kv => kv.Key.Key.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                bool nameHit = p.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0;
+                if (!nameHit) entries = entries.Where(kv => kv.Key.Key.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
                 if (!nameHit && entries.Count == 0) return;
             }
             bool open = searching || expanded.Contains(p.Name);
@@ -195,7 +198,7 @@ namespace Modz
             }
             if (!open) { GUILayout.Space(1); return; }
 
-            GUILayout.BeginVertical(new GUIStyle { padding = new RectOffset(14, 14, 6, 10) });
+            GUILayout.BeginVertical(pageBody);
             if (p.Error != null) GUILayout.Label("Stopped: " + p.Error, Theme.TextStyle(11, Theme.Bad, "left", false, true, true));
             if (!string.IsNullOrEmpty(p.Description)) GUILayout.Label(p.Description, Theme.TextStyle(12, Theme.Dim, "left", false, true));
 
