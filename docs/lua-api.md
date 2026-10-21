@@ -219,7 +219,7 @@ When **Online mods (experimental)** is on and every player in an online lobby ha
 | `net.on(name, fn(sender, table))` | React when another player's copy sends `name` |
 | `net.me()` | Your Steam id, as text |
 
-Tables can hold numbers, strings, booleans and other tables. Send vectors as `{ x, y, z }`. Game tweaks such as slow motion stay offline only.
+Tables can hold numbers, strings, booleans and other tables, up to 32 levels deep. Send vectors as `{ x, y, z }`. A message can be about 1 KB unreliable or 16 KB reliable; bigger ones are not sent. Game tweaks such as slow motion stay offline only.
 
 ## Speed
 
