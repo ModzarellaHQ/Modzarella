@@ -11,7 +11,7 @@ public static class Web
     static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
     static readonly SemaphoreSlim busy = new(1, 1);
     static Task<(string Version, string Url)?>? appUpdate;
-    static readonly string AppVersion = typeof(Web).Assembly.GetName().Version!.ToString(3);
+    public static readonly string AppVersion = typeof(Web).Assembly.GetName().Version!.ToString(3);
     static readonly Dictionary<string, string> links = new()
     {
         ["site"] = "https://modza.space",
@@ -26,8 +26,7 @@ public static class Web
         {
             var latest = await http.GetFromJsonAsync<JsonElement>("https://api.github.com/repos/ModzarellaHQ/Modzarella/releases/latest");
             var tag = latest.GetProperty("tag_name").GetString()!.TrimStart('v');
-            var current = typeof(Web).Assembly.GetName().Version!;
-            return Version.TryParse(tag, out var v) && v > new Version(current.Major, current.Minor, current.Build)
+            return Version.TryParse(tag, out var v) && v > Version.Parse(AppVersion)
                 ? (tag, latest.GetProperty("html_url").GetString()!)
                 : null;
         }

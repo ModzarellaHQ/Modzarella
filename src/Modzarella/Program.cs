@@ -11,7 +11,7 @@ static class Program
     {
         var settings = Settings.Load();
         var http = new HttpClient();
-        http.DefaultRequestHeaders.UserAgent.ParseAdd("Modzarella/1.0");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd("Modzarella/" + Web.AppVersion);
         if (args.Length == 0 || args[0].StartsWith("-psn")) return Window(settings, http);
         if (OperatingSystem.IsWindows()) AttachConsole(-1);
         return Cli.Run(args, settings, http).GetAwaiter().GetResult();
