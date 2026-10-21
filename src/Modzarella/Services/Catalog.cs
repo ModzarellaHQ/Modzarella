@@ -16,6 +16,8 @@ public class Catalog(string source, HttpClient http)
     static (string Source, string? ETag, Mod[] Mods, DateTime At)? cached;
     bool Local => !source.StartsWith("http://") && !source.StartsWith("https://");
 
+    static readonly HashSet<string> FileTypes = [".lua", ".wav", ".glb", ".gltf", ".bin", ".png", ".jpg", ".jpeg", ".json", ".txt", ".md"];
+
     public static bool ValidId(string? id) => id != null && System.Text.RegularExpressions.Regex.IsMatch(id, "^[a-z0-9]+(-[a-z0-9]+)*$");
 
     static string Inside(string dir, string relative)
@@ -90,6 +92,8 @@ public class Catalog(string source, HttpClient http)
         {
             foreach (var f in mod.Files)
             {
+                if (!FileTypes.Contains(System.IO.Path.GetExtension(f.Target).ToLowerInvariant()) || System.IO.Path.GetFileName(f.Target) == "mod.json")
+                    throw new Exception($"{mod.Name} contains a file type mods can't have: {f.Target}");
                 var to = Inside(staging, f.Target);
                 var have = Inside(old, f.Target);
                 Directory.CreateDirectory(System.IO.Path.GetDirectoryName(to)!);

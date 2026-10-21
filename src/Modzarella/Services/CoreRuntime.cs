@@ -11,7 +11,10 @@ public static class CoreRuntime
             if (Directory.Exists(old)) Directory.Delete(old, true);
         // installs cut short by older versions left Modz/<id>.new, which the game loaded as a mod
         if (Directory.Exists(game.Plugins))
+        {
             foreach (var left in Directory.GetDirectories(game.Plugins, "*.new")) Directory.Delete(left, true);
+            foreach (var dll in Directory.GetFiles(game.Plugins, "*.dll", SearchOption.AllDirectories)) File.Delete(dll);
+        }
 
         var dir = Path.Combine(game.Dir, "BepInEx", "plugins", "Modzarella");
         Directory.CreateDirectory(dir);
