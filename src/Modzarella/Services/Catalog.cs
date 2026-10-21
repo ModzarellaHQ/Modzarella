@@ -49,7 +49,7 @@ public class Catalog(string source, HttpClient http)
         return mods;
     }
 
-    static Mod[] Parse(byte[] json) => JsonSerializer.Deserialize<Index>(json, Json)!.Mods
+    static Mod[] Parse(byte[] json) => (JsonSerializer.Deserialize<Index>(json, Json)?.Mods ?? throw new Exception("The mod list is empty or broken."))
         .Where(m => ValidId(m.Id) && m.Files != null)
         .Select(m => m.Dependencies == null ? m with { Dependencies = [] } : m).ToArray();
 

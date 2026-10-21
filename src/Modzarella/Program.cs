@@ -10,7 +10,7 @@ static class Program
     static int Main(string[] args)
     {
         var settings = Settings.Load();
-        var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+        var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60), MaxResponseContentBufferSize = 64 << 20 };
         http.DefaultRequestHeaders.UserAgent.ParseAdd("Modzarella/" + Web.AppVersion);
         if (args.Length == 0 || args[0].StartsWith("-psn")) return Window(settings, http);
         if (OperatingSystem.IsWindows()) AttachConsole(-1);

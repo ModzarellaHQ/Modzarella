@@ -26,8 +26,9 @@ public static class Web
         {
             var latest = await http.GetFromJsonAsync<JsonElement>("https://api.github.com/repos/ModzarellaHQ/Modzarella/releases/latest");
             var tag = latest.GetProperty("tag_name").GetString()!.TrimStart('v');
-            return Version.TryParse(tag, out var v) && v > Version.Parse(AppVersion)
-                ? (tag, latest.GetProperty("html_url").GetString()!)
+            var url = latest.GetProperty("html_url").GetString()!;
+            return Version.TryParse(tag, out var v) && v > Version.Parse(AppVersion) && url.StartsWith(links["github"] + "/releases/")
+                ? (tag, url)
                 : null;
         }
         catch { return null; }
