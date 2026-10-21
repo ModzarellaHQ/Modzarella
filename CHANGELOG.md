@@ -6,7 +6,6 @@
 - An install that fails halfway no longer leaves a second copy of the mod running in game
 - A renamed mod that was turned off stays off after it updates
 - A broken mod list or mod file no longer stops the app from showing your mods
-- The title bar no longer repeats that Cheese Rolling wasn't found
 
 ## 1.3.0
 
