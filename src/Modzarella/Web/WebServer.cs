@@ -97,7 +97,7 @@ public static class Web
             if (path == "/api/do")
             {
                 var origin = req.Headers["Origin"];
-                if (req.HttpMethod != "POST" || req.ContentType?.StartsWith("application/json") != true || (origin != null && origin != $"http://{host}") || req.ContentLength64 > 16384)
+                if (req.HttpMethod != "POST" || req.ContentType?.StartsWith("application/json") != true || (origin != null && origin != $"http://{host}") || req.ContentLength64 is < 0 or > 16384)
                 {
                     await Send(res, 403, new { error = "forbidden" });
                     return;
@@ -161,7 +161,13 @@ public static class Web
 
     static async Task<List<string>> Do(Settings settings, HttpClient http, Request r)
     {
-        if (r.Action == "source") { settings.Source = r.Value!.Trim(); settings.Save(); return ["Source set."]; }
+        if (r.Action == "source")
+        {
+            if (string.IsNullOrWhiteSpace(r.Value)) throw new Exception("Enter a URL or a folder.");
+            settings.Source = r.Value.Trim();
+            settings.Save();
+            return ["Source set."];
+        }
         if (r.Action == "autoupdate") { settings.AutoUpdate = r.Value == "true"; settings.Save(); return [settings.AutoUpdate ? "Mods update automatically." : "Automatic updates off."]; }
         if (r.Action == "release")
         {
