@@ -20,15 +20,28 @@ public static class CoreRuntime
         foreach (var name in asm.GetManifestResourceNames().Where(n => n.StartsWith("runtime/")))
         {
             using var s = asm.GetManifestResourceStream(name)!;
-            using var m = new MemoryStream();
-            s.CopyTo(m);
             var path = Path.Combine(dir, name["runtime/".Length..]);
-            if (File.Exists(path) && File.ReadAllBytes(path).AsSpan().SequenceEqual(m.ToArray())) continue;
-            File.WriteAllBytes(path, m.ToArray());
+            if (Same(path, s)) continue;
+            using (var f = File.Create(path)) s.CopyTo(f);
             changed = true;
         }
         LateStart(game);
         return changed ? "Modzarella Core installed." : null;
+    }
+
+    static bool Same(string path, Stream resource)
+    {
+        var file = new FileInfo(path);
+        if (!file.Exists || file.Length != resource.Length) return false;
+        try
+        {
+            using var f = file.OpenRead();
+            Span<byte> a = stackalloc byte[4096], b = stackalloc byte[4096];
+            for (int n; (n = resource.Read(a)) > 0;)
+                if (f.ReadAtLeast(b[..n], n, false) != n || !a[..n].SequenceEqual(b[..n])) return false;
+            return true;
+        }
+        finally { resource.Position = 0; }
     }
 
     // start plugins once the game's camera exists; the earlier default start leaves them silent on Windows
