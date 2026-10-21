@@ -7,7 +7,8 @@ let busy = false, mods = [], current = 'installed', firstLoad = true, hideLog;
 function tab(name) {
   current = name;
   for (const t of tabs) $('tab' + t[0].toUpperCase() + t.slice(1)).setAttribute('aria-selected', t === name);
-  $('mods').hidden = $('search').hidden = name === 'settings';
+  $('mods').hidden = name === 'settings';
+  $('search').style.visibility = name === 'settings' ? 'hidden' : '';
   $('settings').hidden = name !== 'settings';
   render();
 }
