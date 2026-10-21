@@ -42,7 +42,9 @@ namespace Modz
             Script.DefaultOptions.DebugPrint = s => CorePlugin.Log.LogInfo(s);
             if (!Directory.Exists(ModsDir)) return;
             foreach (var dir in Directory.GetDirectories(ModsDir).OrderBy(d => d))
-                if (File.Exists(Path.Combine(dir, "main.lua"))) Load(dir);
+                if (File.Exists(Path.Combine(dir, "main.lua")))
+                    try { Load(dir); }
+                    catch (Exception e) { CorePlugin.Log.LogError($"Couldn't load the mod in {dir}: {e}"); }
         }
 
         void Load(string dir)
@@ -50,11 +52,14 @@ namespace Modz
             var mod = new LuaMod { Dir = dir, Id = Path.GetFileName(dir) };
             mod.Name = mod.Id;
             var manifest = Path.Combine(dir, "mod.json");
-            if (File.Exists(manifest) && MiniJson.Parse(File.ReadAllText(manifest)) is Dictionary<string, object> m)
+            Dictionary<string, object> m = null;
+            try { m = File.Exists(manifest) ? MiniJson.Parse(File.ReadAllText(manifest)) as Dictionary<string, object> : null; }
+            catch (Exception e) { CorePlugin.Log.LogWarning($"[{mod.Id}] mod.json can't be read: {e.Message}"); }
+            if (m != null)
             {
-                mod.Name = m.TryGetValue("name", out var n) ? n.ToString() : mod.Id;
-                mod.Version = m.TryGetValue("version", out var v) ? v.ToString() : "";
-                mod.Description = m.TryGetValue("description", out var d) ? d.ToString() : "";
+                mod.Name = m.TryGetValue("name", out var n) && n != null ? n.ToString() : mod.Id;
+                mod.Version = m.TryGetValue("version", out var v) ? v?.ToString() ?? "" : "";
+                mod.Description = m.TryGetValue("description", out var d) ? d?.ToString() ?? "" : "";
             }
             mod.Config = new ConfigFile(Path.Combine(Paths.ConfigPath, $"modz.{mod.Id}.cfg"), true);
             Mods.Add(mod);
