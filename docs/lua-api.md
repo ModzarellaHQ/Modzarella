@@ -206,7 +206,7 @@ events.on("bullet_hit", function(part, point, dir, power) ... end)
 events.emit("bullet_hit", part, point, dir, power)
 ```
 
-Events in use: `bullet_hit(part, point, dir, power)`, `explosion(point, radius, power)` and `wheels_bloody(rigidbody, point)`. Emitting an event nobody listens to is fine, so mods never need each other installed.
+Events in use: `bullet_hit(part, point, dir, power)`, `explosion(point, radius, power)` and `wheels_bloody(rigidbody, point)`. Emitting an event nobody listens to is fine, so mods never need each other installed. Tables are copied to each listener (functions in them become `nil`), and `events.emit` returns the first listener's answer.
 
 ## Online
 
