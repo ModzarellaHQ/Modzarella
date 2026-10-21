@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.2
+
+- macOS: no title bar; the window buttons sit in the header, and dragging the header moves the window
+- Header shows only the name, version and Play
+- The tab bar keeps its height on Settings
+- The app opens faster: it no longer waits for the update check
+- Security: Lua mods can't reach .NET reflection, files, processes or the network, mods can only install scripts, sounds, models, images and text, and models only load files from their own folder
+- Online mods only accept messages from players in the lobby, with size and depth limits
+- Settings are saved safely, downloads are size-limited, and bad requests to the app are refused
+
 ## 1.3.1
 
 - Lighter: downloads are about 75% smaller, and the app uses less memory
