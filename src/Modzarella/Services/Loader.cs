@@ -32,12 +32,11 @@ public static class Loader
             .Replace("exec arch -e DYLD_INSERT_LIBRARIES", "exec arch -x86_64 -e DYLD_INSERT_LIBRARIES");
         File.WriteAllText(script, s);
         if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(script, File.GetUnixFileMode(script) | UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute);
-
     }
 
     public static string Remove(Game game)
     {
-        foreach (var d in new[] { "BepInEx" }) if (Directory.Exists(Path.Combine(game.Dir, d))) Directory.Delete(Path.Combine(game.Dir, d), true);
+        if (Directory.Exists(Path.Combine(game.Dir, "BepInEx"))) Directory.Delete(Path.Combine(game.Dir, "BepInEx"), true);
         foreach (var f in new[] { "winhttp.dll", "doorstop_config.ini", ".doorstop_version", "libdoorstop.dylib", "run_bepinex.sh", "changelog.txt" })
             if (File.Exists(Path.Combine(game.Dir, f))) File.Delete(Path.Combine(game.Dir, f));
         return "Loader and all mods removed.";
